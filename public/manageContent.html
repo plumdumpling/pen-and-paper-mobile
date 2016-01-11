@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>Pen &amp; Paper | v1.0.0</title>
+
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link rel="stylesheet" type="text/css" href="css/manageContent.css">
+</head>
+<body class="<%= contentType %>">
+
+<a href="/"><img id="backBtn" src="/images/back.png"/></a>
+
+<!-- HEADER -->
+<header>
+  <h3>
+  <% if(contentType==='characters'){ %>Hier kannst du deine Charaktere verwalten,<br/>solange sie gerade in keinem Abenteuer stecken.<% } %>
+  <% if(contentType==='scenes'){ %>Hier ist Platz für viele spannende Szenen<br/>an denen deine Abenteuer spielen können.<% } %>
+  <% if(contentType==='enemies'){ %>Sie beißen, stechen, schießen, reißen...<br/>Gegner die zum Kampf bereit stehen.<% } %>
+  <% if(contentType==='items'){ %>Ob nützlich oder einfach hübsch, dies alles<br/>können die Charaktere sammeln.<% } %>
+  </h3>
+
+  <% if(categories.length > 0){ %><a id="categories" class="categoriesList">Alle <% if(contentType==='characters'){ %>Charaktere<% } %><% if(contentType==='scenes'){ %>Szenen<% } %><% if(contentType==='enemies'){ %>Gegner<% } %><% if(contentType==='items'){ %>Gegenstände<% } %></a><br/>
+  <ul id="categoriesList" class="dropDownList hidden">
+    <li data-value="" class="selected">Alle <% if(contentType==='characters'){ %>Charaktere<% } %><% if(contentType==='scenes'){ %>Szenen<% } %><% if(contentType==='enemies'){ %>Gegner<% } %><% if(contentType==='items'){ %>Gegenstände<% } %></li>
+		<% for(var i=0; i<categories.length; i++){ %><li data-value="<%= categories[i].id %>"><%= categories[i].name %></li><% } %>
+	</ul><% } %>
+
+  <!-- dotted line -->
+  <svg width="100%" height="6px" class="dottedLine">
+    <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+  </svg>
+</header>
+
+
+<!-- CONTENT LIST -->
+<div id="content">
+  <div id="wrapper">
+    <div id="inner">
+    <ul id="<%= contentType %>">
+      <li id="new"><p><img src="/images/addContent.png"/><% if(contentType==='characters'){ %>Neuen Charakter<% } %><% if(contentType==='scenes'){ %>Neue Szene<% } %><% if(contentType==='enemies'){ %>Neuen Gegner<% } %><% if(contentType==='items'){ %>Neuen Gegenstand<% } %> erstellen</p></li>
+    <% for(var i=0; i<response.length; i++){ %>
+    	<li id="<%= contentType %>_<%= response[i].id %>"<% if(categories.length > 0){ %> data-category="<%= response[i].category %>"<% } %>>
+        <span class="buttons">
+          <a class="edit" href="/edit/<%= contentType %>/<%= response[i].id %>/0"><img src="/images/edit.png" alt="edit"/></a>
+          <a class="delete" onClick="deleteContent(<%= response[i].id %>);"><img src="/images/delete.png" alt="delete"/></a>
+        </span>
+
+        <div class="content">
+          <div class="contentImage" style="background-image: url('<%= response[i].imagepath %>')"></div>
+
+          <h4><%= response[i].name %></h4>
+      <% if(contentType==='characters'){ %>
+      		<p><%= response[i].age %> Jahr<% if(response[i].age!==1){ %>e<% } %> alt, <%= response[i].occupation %> aus <%= response[i].origin %></p>
+      <% } %>
+      <% if(contentType==='scenes'){ %>
+      		<p>Ton <% if(!response[i].soundpath){ %>nicht <% } %>verfügbar</p>
+      <% } %>
+      <% if(contentType!=='scenes'){ %>
+      		<p><%= response[i].description %></p>
+      <% } %>
+        </div>
+
+        <br class="clear">
+    	</li>
+    <% } %>
+    </ul>
+    </div>
+  </div>
+</div>
+
+<% include popupAndNotification %>
+
+
+<!-- JavaScript - libraries and modules  -->
+<script src="js/jquery-1.11.2.min.js"></script>
+
+<!-- JavaScript - custom scripts  -->
+<script type="text/javascript" src="js/basic.js"></script>
+<script type="text/javascript">
+
+/* DROP DOWN CATEGORY LIST */
+$('html').click(function() {
+  // hide dropdown list if visible
+  if(!$('#categoriesList').hasClass('hidden')) toggleList();
+});
+
+$(document).on('click', '#categories', function (event){
+  event.stopPropagation();
+  toggleList();
+});
+
+function toggleList (){
+  // hide or show dropdown list
+  if($('#categoriesList').hasClass('hidden')){
+    $('#categoriesList').removeClass('hidden');
+    $('#categories').addClass('active');
+  }
+  else{
+    $('#categoriesList').addClass('hidden');
+    $('#categories').removeClass('active');
+  }
+}
+
+$(document).on('click', '#categoriesList li', function (event){
+  // mark list element as selected
+  $('#categoriesList li.selected').each(function (){
+    $(this).removeClass('selected');
+  });
+  $(this).addClass('selected');
+  // rename list title
+  document.getElementById('categories').innerHTML = $(this).html();
+
+  // get selected category
+  var category = $(this).attr('data-value');
+
+  if(category === ''){
+    // show all if no category is selected
+    $('#<%= contentType %> li').each(function (){
+      $(this).show();
+    });
+  }
+  else{
+    // show all list items for category
+    $('#<%= contentType %> li').each(function (){
+      if($(this).attr('data-category') === category) $(this).show();
+      else if($(this).attr('id') !== 'new') $(this).hide();
+    });
+  }
+});
+
+/* ADD CONTENT */
+$(document).on('click', '#new', function (event){
+  window.location.href = '/create/<%= contentType %>';
+});
+
+/* DELETE CONTENT */
+function deleteContent (id) {
+  popupWithContent('Eintrag löschen', '<p>Bist du dir sicher, dass du den Eintrag löschen möchtest?</p>', [{f:'deleteNow(\''+id+'\')', title:'Ja'}, {f:'closePopup()', title:'Nein'}]);
+}
+
+function deleteNow (id){
+  closePopup();
+  $.ajax({
+    url: '/delete/<%= contentType %>',
+    type: 'DELETE',
+    data: {contentID:id}
+  }).done(function(response) {
+    if(!response.err){
+      $('#<%= contentType %>_'+id).remove();
+    }
+    else{
+      popup('Hoppla, da lief was schief!', 'Wo ist denn die Mülltonne abgeblieben? Leider konnte nichts gelöscht werden. Bitte versuche es erneut.');
+    }
+  }).fail(function() {
+    popup('Hoppla, da lief was schief!', 'Wo ist denn die Mülltonne abgeblieben? Leider konnte nichts gelöscht werden. Bitte versuche es erneut.');
+  });
+}
+
+</script>
+
+</body>
+</html>

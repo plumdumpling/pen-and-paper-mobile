@@ -1,0 +1,12 @@
+{
+	"httpPort": 3000,
+	"connection": {
+		"host": "127.0.0.1",
+		"user": "pap-user",
+		"password": "lovepenandpaper",
+		"database": "penandpaper",
+		"port": 3306
+	},
+   "sessionSecret": "5T100q59Zd#$hXA",
+   "sessionCookieExpirationTime": 1800000
+}

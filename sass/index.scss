@@ -1,0 +1,143 @@
+// out: ../public/css/landingPage.css
+
+@import "colors";
+@import "fonts";
+@import "animations";
+@import "buttons";
+@import "crossbrowser";
+
+body, html{
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+  overflow-x: hidden;
+}
+
+a{ cursor: pointer; }
+
+/* LANDING PAGE */
+.form{
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  @include transition('top 1s ease, left 1s ease, right 1s ease');
+
+  .inner{
+    z-index: 45;
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    max-height: 500px;
+    left: -50%;
+    margin-left: -20px;
+    padding: 20px 20px 40px;
+    background-color: $slate;
+    background-image: url("images/gradient.png");
+    background-position: bottom;
+    background-repeat: no-repeat;
+    background-size: contain;
+    @include transition('margin-left 1s ease, padding 0.7s ease 0.3s, width 0.7s ease 0.3s, max-height 0.7s ease 0.3s');
+
+    @media screen and (max-device-width: 480px) {
+    margin-left: -20px;
+    }
+
+    h1{
+      color: #fff;
+      font-size: 3em;
+      @include transition('all 0.7s ease 0.3s');
+    }
+
+    form{
+      min-width: 280px;
+      text-align: center;
+      @include opacity(0);
+      @include animation('showUp 0.5s 0.7s normal forwards');
+
+      .inputField{
+        input{
+          position: relative;
+          z-index: 45;
+          width: 90%;
+          margin-bottom: 30px;
+          padding: 0;
+          font-size: 2em;
+          color: #fff;
+          outline: none;
+          border: none;
+          @include property('border-radius', '0');
+          border-bottom: 2px solid #fff;
+          background-color: rgba(255,255,255,0);
+
+          &:focus{
+            border-bottom: 2px solid $lightBlue;
+          }
+        }
+
+        label{
+          position: absolute;
+          z-index: 5;
+          margin-top: 10px;
+          font-size: 1.5em;
+          font-weight: $bold;
+          color: $lightBlue;
+          @include transition('all 0.3s');
+        }
+
+        &.filled{
+          label{
+            margin-top: 55px;
+            font-size: 1em;
+            @include transition('all 0.3s');
+          }
+        }
+      }
+
+      p{
+        color: #fff;
+        a{
+          color: #fff;
+          text-decoration: underline;
+        }
+      }
+
+      .submit{
+        margin-top: 10px;
+        @include whiteButton();
+      }
+    }
+  }
+
+  &.hidden{
+    width: auto;
+    top: 10px;
+    left: 100%;
+    &#login .inner{ margin-left: -240px; }
+    &#registrate .inner{ margin-left: -120px; }
+    @include transition('none');
+
+    .inner{
+      z-index: 5;
+      width: 100px;
+      max-height: 20px;
+      left: auto;
+      padding: 5px;
+      @include transition('none');
+
+      h1{
+        font-size: 1em;
+        @include transition('none');
+      }
+
+      form{
+        display: none;
+        @include opacity(0);
+      }
+    }
+  }
+}

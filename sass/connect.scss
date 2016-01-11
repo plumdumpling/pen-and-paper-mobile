@@ -1,0 +1,148 @@
+// out: ../public/css/connect.css
+
+@import "colors";
+@import "fonts";
+@import "animations";
+@import "buttons";
+@import "crossbrowser";
+
+
+/* CONNECTING PAGE */
+
+header{
+  &.gamemaster{
+    @include background-gradient('#f16a62, #fc8368');
+  }
+
+  &.player{
+    @include background-gradient('#15a37c, #14c288');
+  }
+}
+
+#wrapper{
+  width: 100%;
+  height: 100%;
+  // overflow: hidden;
+  overflow-x: scroll;
+
+  a{
+    position: relative;
+    margin: auto;
+  }
+
+  select{
+    @include property('appearance', 'none');
+    @include dropDownLight();
+  }
+
+  #stepOuter{
+    position: relative;
+    top: 180px;
+    padding: 0;
+
+    .step{
+      display: inline-block;
+      box-sizing: border-box;
+      vertical-align: top;
+      text-align: center;
+
+      #code{
+        font-family: "Lucida Console", Monaco, monospace;
+        font-size: 2em;
+        font-weight: $bold;
+        letter-spacing: 1px;
+      }
+
+      #playerCode{
+        font-weight: $regular;
+        letter-spacing: 1px;
+      }
+
+      #players{
+        height: 40px;
+
+        p{
+          display: inline-block;
+          margin: 0 10px;
+          font-size: 1.5em;
+          font-weight: $regular;
+        }
+      }
+
+      #startBtn.disabled{
+        cursor: default;
+        @include background-gradient('#aaa, #ccc');
+      }
+
+      h3{
+        line-height: 80px;
+        margin: 0 0 20px;
+      }
+
+      &.s1 h3{
+        margin: 0;
+      }
+
+      &.s2 h3{
+        line-height: 1.2em;
+        height: 80px;
+      }
+
+      p{
+        margin: 0 0 10px;
+      }
+
+      label{
+        display: inline-block;
+        width: 200px;
+        margin: auto;
+        text-align: left;
+      }
+
+      input[type=radio]{
+        display: none;
+
+        & + label{
+          width: 16px;
+          height: 16px;
+          margin: 1px 16px 16px;
+          vertical-align: top;
+          background-color: #fff;
+          border: 4px solid $salmon;
+          @include property('border-radius','12px');
+          @include transition('all 0.3s ease');
+        }
+
+        &:checked + label{
+          background-color: $salmon;
+        }
+      }
+
+      input[type=text]{
+        width: 200px;
+        padding: 7px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-family: "Lucida Console", Monaco, monospace;
+        font-size: 2em;
+        font-weight: $bold;
+        letter-spacing: 1px;
+        color: #fff;
+        outline: none;
+        border: none;
+        @include property('border-radius', '0');
+        background-color: $appleGreen;
+      }
+
+      #joinDIV{
+        h3{
+          margin: 0;
+        }
+
+        p{
+          margin-top: -20px;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+	"attributes": {
+		"title": ["Intelligenz", "Intuition",
+							"Geschicklichkeit", "Stärke",
+							"Intriganz", "Sozial"],
+		"name": ["intelligence", "intuition",
+						"agility", "strength",
+						"scheming", "social"]
+	},
+
+
+	"skills": {
+		"title": ["Reflexe", "Medizin & Kräuterkunde", "Kulturen & Bräuche", "Technisches Verständnis",
+						"Spuren lesen", "Maschinen steuern", "Handwerkliche Begabung", "Körperbeherrschung",
+						"Schießen", "Werfen", "Nahkampf", "Fitness", "Schleichen & Diebesgeschick",
+						"Lügen", "Verhandeln", "Charisma", "Fallen & Lügen erkennen"],
+		"name": ["reflexe", "medicine", "culture", "technology", 
+						"readtracks", "machine", "crafting", "bodycontrol", 
+						"shoot", "throw", "melee", "fitness", "sneak", 
+						"lie", "bargain", "charisma", "recognizetrap"]
+	},
+
+
+	"characteristics": {
+		"advantages": {
+			"title": [],
+			"name": []
+		},
+		"disadvantages": {
+			"title": [],
+			"name": []
+		}
+	}
+}

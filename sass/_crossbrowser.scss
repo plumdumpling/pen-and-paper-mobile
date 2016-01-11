@@ -1,0 +1,26 @@
+// main: base.scss
+
+// define some cross browser mixins
+@mixin opacity($value){
+  $filter-value: $value*100;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=$filter-value)";
+  filter: alpha(opacity=$filter-value);
+  -moz-opacity: $value;
+  -khtml-opacity: $value;
+  opacity: $value;
+}
+
+@mixin background-gradient($value){
+  background: -webkit-linear-gradient(left top, unquote($value));
+  background: -moz-linear-gradient(bottom right, unquote($value));
+  background: -o-linear-gradient(bottom right, unquote($value));
+  background: linear-gradient(to bottom right, unquote($value));
+}
+
+@mixin property($property, $value){
+  -webkit-#{$property}: unquote($value);
+  -moz-#{$property}: unquote($value);
+  -ms-#{$property}: unquote($value);
+  -o-#{$property}: unquote($value);
+  #{$property}: unquote($value);
+}

@@ -1,0 +1,40 @@
+<!-- STEP 1 - SCENE INFORMATIONS -->
+<div class="step current" data-step="1" data-title="Informationen">
+	<h3>Beschreibe die Szene.</h3>
+
+	<label>Name der Szene</label><input type="text" name="name" maxlength="70"<% if(response){ %> value="<%= response.name %>"<% } %>>
+	<label>Beschreibung</label><p id="sceneDescription" contenteditable="true"></p>
+
+	<button id="addBtn" onClick="return addButton();" style="opacity: 0;">Infos hinzufügen</button>
+</div><!--
+
+STEP 2 - SCENE IMAGE
+--><div class="step" data-step="2" data-title="Aussehen">
+	<h3>Male einen Szenenhintergrund.</h3>
+
+	<div id="canvasOuter">
+		<div id="canvasInner">
+			<div id="maxCanvas"></div>
+			<canvas id="canvas" width="1200" height="600" style="border:1px solid #fff;"></canvas>
+		</div>
+	</div>
+	<!-- blank canvas for checking if something was drawn -->
+	<canvas id="blankCanvas" width="1200" height="600" style="display:none"></canvas>
+</div><!--
+
+STEP 3 - SCENE SOUND
+--><div class="step" data-step="3" data-title="Soundkulisse">
+	<h3>Hier kannst du bald eine Soundkulisse für deine Szenen hochladen.</h3>
+</div><!--
+
+STEP 4 - SCENE CATEGORY
+--><div class="step" data-step="4" data-title="Kategorie">
+	<h3>Ordne deine Szene einer Kategorie zu.</h3>
+
+	<label>Kategorie</label><select name="category">
+		<option value="0" selected>Kategorie wählen</option>
+		<% for(var i=0; i<categories.length; i++){ %>
+		<option value="<%= categories[i].id %>"<% if(response.category===categories[i].id){ %> selected<% } %>><%= categories[i].name %></option>
+		<% } %>
+	</select>
+</div>

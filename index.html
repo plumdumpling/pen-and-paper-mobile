@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>Pen &amp; Paper | v1.0.0</title>
+
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link rel="stylesheet" type="text/css" href="css/landingPage.css">
+</head>
+<body class="preload">
+
+<div id="login" class="form<% if(!login){ %> hidden<% } %>">
+  <div class="inner">
+    <h1>Anmelden</h1>
+    <form name="loginForm" action="/login" onsubmit="return validateLoginForm()" method="post">
+      <span class="inputField"><label for="username">Benutzername</label><input type="text" name="username" maxLength="30" required /></span><br/>
+      <span class="inputField"><label for="password">Password</label><input type="password" name="password" maxLength="20" autocomplete="off" required /></span><br/>
+      <p>Noch keinen Account? Jetzt <a class="changeForm" onclick="registrateNow();">kostenlos registrieren</a>.</p>
+
+      <button class="submit">Anmelden</button>
+    </form>
+  </div>
+</div>
+
+<div id="registrate" class="form<% if(!registrate){ %> hidden<% } %>">
+  <div class="inner">
+    <h1>Kostenlos registrieren</h1>
+    <form name="registrationForm" action="/registrate" onsubmit="return validateRegistrationForm()" method="post">
+      <span class="inputField<% if(registrate && userdata.username){ %> filled<% } %>"><label for="username">Benutzername</label><input type="text" name="username" maxLength="30"<% if(registrate && userdata.username){ %> value="<%= userdata.username %>"<% } %> required /></span><br/>
+      <span class="inputField<% if(registrate && userdata.email){ %> filled<% } %>"><label for="email">Email</label><input type="email" name="email"<% if(registrate && userdata.email){ %> value="<%= userdata.email %>"<% } %> required /></span><br/>
+      <span class="inputField"><label for="password">Password</label><input type="password" name="password" maxLength="20" autocomplete="off" required /></span><br/>
+      <span class="inputField"><label for="passwordWdh">Password wiederholen</label><input type="password" name="passwordWdh" maxLength="20" autocomplete="off" required /></span><br/>
+      <p>Du hast bereits einen Account? Jetzt <a class="changeForm" onclick="loginNow();">anmelden</a>.</p>
+
+      <button class="submit">Registrieren</button>
+    </form>
+  </div>
+</div>
+
+<div id="backgroundTop">
+  <svg width="100%" height="500px" viewBox="0 0 211 212" preserveAspectRatio="none">
+  	<polygon fill="#33373F" points="211,212 0,118.966 0,0 211,0"/>
+  </svg>
+</div>
+
+<div id="headline">
+  <div></div><!--
+  --><div>
+    <h2>Spiele jetzt dein individuelles</h2>
+    <h1>Pen-&amp;-Paper-Abenteuer</h1>
+  </div>
+</div>
+
+<div id="info">
+  <h3>Was ist Pen-&amp;-Paper<br/>und wie wird es gespielt?</h3>
+  <p>Beim Rollenspiel im Allgemeinen schlüpft der Spieler in die Rolle einer Figur in einer Geschichte und kann die Handlung so nach seinen Wünschen beeinflussen. Das Pen-&amp;-Paper-Genre macht hier keine Ausnahme.</p>
+    <p>Pen-&amp;-Paper-Abenteuer werden meist in einer Gruppe aus drei bis sechs Freunden erlebt.<br/>
+    Einer der Teilnehmer übernimmt dabei die Rolle des Geschichtenerzählers und “Schiedsrichters”, genannt Spielleiter, Dungeon- oder Gamemaster. Er ist für die Handlung der Geschichte und Einhaltung der Regeln verantwortlich, wobei er diese nach seinen Wünschen selbst anpassen und verändern darf.<br/>
+    Die übrigen Teilnehmer übernehmen die Rolle von Figuren in der Geschichte. Diese Figuren werden als Spielercharaktere bezeichnet und werden von den Spielern vor dem Abenteuer ausgedacht und, wie es der Name des Genres verrät, auf Papier festgehalten.<br/>
+    Alle anderen Figuren die in der Geschichte, die Nicht-Spieler-Charaktere, werden vom Spielleiter gespielt.</p>
+</div>
+
+<% include public/popupAndNotification %>
+
+
+<!-- JavaScript - libraries and modules  -->
+<script src="js/jquery-1.11.2.min.js"></script>
+
+<!-- JavaScript - custom scripts  -->
+<script type="text/javascript" src="js/basic.js"></script>
+<script type="text/javascript">
+<% if(login || registrate){ %>
+$(document).ready(function (){
+  <% if(login){ %>formPopup('<%= login %>');<% } %>
+  <% if(registrate){ %>formPopup('<%= registrate %>');<% } %>
+  $('#shadowBox').addClass('visible');
+});
+<% } %>
+
+/* LOGIN AND REGISTRATION FORM */
+$('.form').on('click', function (event){
+  if($(this).hasClass('hidden') && !$(event.target).hasClass('changeForm')) show($(this).attr('id'));
+});
+
+function show (formID){
+  console.log('a');
+  $('.form').each(function (){
+    $(this).addClass('hidden');
+  });
+  $('#'+formID).removeClass('hidden');
+  // show shadow box
+  $('#shadowBox').addClass('visible');
+}
+
+$('#shadowBox').click(function (){
+  $('.form').each(function (){
+    $(this).addClass('hidden');
+  });
+  // hide shadow box
+  $('#shadowBox').removeClass('visible');
+});
+
+
+function registrateNow (){
+  // hide and clear login form
+  $('#login').addClass('hidden');
+  $('#login input').each(function (){
+    $(this).val('');
+  });
+  // show registration form
+  $('#registrate').removeClass('hidden');
+}
+
+function loginNow (){
+  console.log('c');
+  // hide and clear registration form
+  $('#registrate').addClass('hidden');
+  $('#registrate input').each(function (){
+    $(this).val('');
+  });
+  // show login form
+  $('#login').removeClass('hidden');
+}
+
+// recognize focus on input fields
+$('input').focus(function (){
+  $(this).parent().addClass('filled');
+});
+
+$('input').focusout(function (){
+  if($(this).val().length <= 0) $(this).parent().removeClass('filled');
+});
+
+
+/* FORM VALIDATION */
+// login form
+function validateLoginForm (){
+  // get input values
+  var username = document.forms["loginForm"]["username"].value,
+    password = document.forms["loginForm"]["password"].value;
+
+  // check if there is still an empty input field
+  if (username=="" || password=="") {
+    formPopup("Bitte fülle alle Felder aus.");
+    return false;
+  }
+  else return true;
+}
+
+// registration form
+function validateRegistrationForm (){
+  // get input values
+  var username = document.forms["registrationForm"]["username"].value,
+    email = document.forms["registrationForm"]["email"].value,
+    password = document.forms["registrationForm"]["password"].value,
+    passwordWdh = document.forms["registrationForm"]["passwordWdh"].value;
+
+  var reEmail = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+
+  var small = /^[a-z]+$/.test(password);
+  var caps = /^[A-Z]+$/.test(password);
+  var numbers = /^[0-9]+$/.test(password);
+
+  // check if there is still an empty input field or an input that contains only spaces
+  if (username=="" || email=="" || password=="" || passwordWdh=="" ||
+    !username.replace(/\s/g, '').length || !email.replace(/\s/g, '').length ||
+    !password.replace(/\s/g, '').length || !passwordWdh.replace(/\s/g, '').length) {
+    formPopup('Bitte fülle alle Felder aus.');
+    return false;
+  }
+  // check if username is alphanumeric
+  else if(/[^a-zA-Z0-9\-\/]/.test(username) ) {
+    formPopup('Bitte verwende keine Sonderzeichen im Benutzernamen.');
+    return false;
+  }
+  // check if email value is a valide email address
+  else if(!reEmail.test(email)){
+    formPopup('Bitte gib eine gültige E-Mail-Adresse ein.');
+    return false;
+  }
+  // check password length
+  else if(password.length <= 8){
+    formPopup('Das Passwort muss mindestens 8 Zeichen lang sein.');
+    return false;
+  }
+  // check if password contains of letters and numbers
+  else if(small && caps && numbers){
+    formPopup('Das Passwort muss sowohl Groß- und Kleinbuchstaben als auch Zahlen beeinhalten.');
+    return false;
+  }
+  // check if password was entered twice
+  else if(password!==passwordWdh){
+    formPopup('Die Passwörter stimmen nicht überein.');
+    return false;
+  }
+  else return true;
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+<div id="inventory">
+  <div class="top">
+    <h1>Inventar</h1>
+    <p>In <%= response.informations.name %>'s Inventar sind  <span id="filledSlots"></span> von <%= inventoryOrder.length %> Plätzen belegt.</p>
+    <div id="trash"><h1>Wegwerfen</h1></div>
+  </div>
+  <!-- dotted line -->
+  <svg width="100%" height="6px" class="dottedLine">
+    <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+  </svg>
+  <div class="bottom">
+    <% for(var n=0; n<inventoryOrder.length; n++){ %><div class="slot<% if(inventoryOrder[n]!=0){ %> filled<% } %>">
+    <% if(inventoryOrder[n]!=0){ %><% for(var m=0; m<inventory.length; m++){ %>
+      <% if(inventory[m].userID){ %><% if('u'+inventory[m].id==inventoryOrder[n]){ %><div class="draggable" id="item-u<%= inventory[m].id %>" style="background-image:url('<%= inventory[m].imagepath %>');"><h3><%= inventory[m].name %></h3></div><% } %>
+      <% }else{ %><% if(inventory[m].id==inventoryOrder[n]){ %><div class="draggable" id="item-<%= inventory[m].id %>" style="background-image:url('<%= inventory[m].imagepath %>');"><h3><%= inventory[m].name %></h3></div><% } %><% } %>
+    <% } %><% } %>
+    </div><% } %>
+  </div>
+</div>
+
+<script type="text/javascript">
+// count filled inventory slots
+document.getElementById('filledSlots').innerHTML = document.querySelectorAll('.slot.filled').length;
+</script>

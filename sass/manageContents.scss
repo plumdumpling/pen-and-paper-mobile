@@ -1,0 +1,180 @@
+// out: ../public/css/manageContent.css
+
+@import "colors";
+@import "fonts";
+@import "animations";
+@import "buttons";
+@import "crossbrowser";
+
+
+/* MANAGE CONTENT */
+body, html{
+  background-color: $slateBlue;
+  display: table;
+}
+
+header{
+  #categories{
+    position: relative;
+    z-index: 15;
+    @include dropDownLight();
+
+    &.active{
+      background-image: url("images/dropdownArrowActive.png");
+    }
+  }
+
+  ul{
+    position: absolute;
+    z-index: 10;
+    width: 264px;
+    left: 50%;
+    margin-left: -133px;
+    margin-top: -5px;
+    padding: 10px 0 0;
+    text-align: left;
+    border: 1px solid #fff;
+
+    &.hidden{ display: none; }
+
+    li{
+      width: 240px;
+      margin: 5px 8px;
+      padding: 5px 5px 10px;
+      color: #fff;
+      border-bottom: 1px solid #fff;
+      cursor: pointer;
+
+      &.selected{ display: none; }
+      &:last-child{ border-bottom: none; }
+    }
+  }
+}
+
+#content{
+  padding-top: 130px;
+}
+
+#inner{
+  top: 10px !important;
+  width: 90%;
+  padding: 0 5% 80px;
+
+  ul{
+    width: 100%;
+
+    li{
+      width: 100%;
+      height: 80px;
+      padding: 20px 0;
+      margin-bottom: 20px;
+      background-color: $slate;
+
+      &#new{
+        text-align: center;
+
+        p{
+          margin: 5px 0;
+          font-family: $handwrittenFont;
+          font-weight: $bold;
+          font-size: 2em;
+        }
+
+        img{
+          vertical-align: middle;
+          height: 65px;
+          padding-bottom: 5px;
+          margin-left: -16px;
+        }
+      }
+
+      h4,p,a{
+        color: #fff;
+      }
+
+      .content{
+        height: 80px;
+        overflow: hidden;
+
+        .contentImage{
+          position: relative;
+          width: 25%;
+          height: 80px;
+          margin: 0 20px;
+          display: inline-block;
+          float: left;
+          overflow: hidden;
+          background-color: $babyBlue;
+          background-position: center center;
+          background-size: contain;
+          background-repeat: no-repeat;
+        }
+
+        h4, p{
+          margin: 0;
+        }
+
+        h4{
+          font-size: 1em;
+          font-weight: $regular;
+          text-transform: uppercase;
+          margin-top: -3px;
+          margin-bottom: 5px;
+        }
+
+        p{
+          font-size: 0.9em;
+          font-weight: $light;
+        }
+      }
+
+      .buttons{
+        position: relative;
+        display: inline-block;
+        float: right;
+        width: 70px;
+        height: 100%;
+
+        a{
+          position: absolute;
+          right: 20px;
+          cursor: pointer;
+
+          img{
+            width: 25px;
+            height: 25px;
+          }
+
+          &.delete{ bottom: -5px; }
+        }
+      }
+    }
+
+    &#scenes li .content .contentImage{
+      background-position: center bottom;
+      background-size: cover;
+    }
+  }
+}
+
+body{
+  &.characters{
+    header ul{ background-color: $appleGreen; }
+    #content ul li#new{ background-color: $appleGreen; }
+  }
+
+  &.items{
+    header ul{ background-color: $purple; }
+    #content ul li#new{ background-color: $purple; }
+  }
+
+  &.enemies{
+    header ul{ background-color: $red; }
+    #content ul li#new{ background-color: $red; }
+  }
+
+  &.scenes{
+    header ul{ background-color: $salmon; }
+    #content ul li#new{ background-color: $salmon; }
+  }
+}

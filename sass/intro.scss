@@ -1,0 +1,156 @@
+// out: ../public/css/intro.css
+
+@import "colors";
+@import "fonts";
+@import "animations";
+@import "buttons";
+@import "crossbrowser";
+
+
+/* INTRODUCTION PAGE */
+
+body{
+  background-color: #fff !important;
+}
+
+a{
+  position: relative;
+  margin: auto;
+}
+
+select{
+  @include property('appearance', 'none');
+  @include dropDownLight();
+}
+
+header{
+  &.gamemaster{
+    @include background-gradient('#f16a62, #fc8368');
+  }
+
+  &.player{
+    @include background-gradient('#15a37c, #14c288');
+  }
+}
+
+#wrapper{
+  width: 100%;
+  height: 100%;
+  // overflow: hidden;
+  overflow-x: scroll;
+}
+
+#selectCharacter{
+  h3,p{
+    color: $slate;    
+  }
+}
+
+#stepOuter{
+  position: relative;
+  top: 180px;
+  width: 300%;
+  padding: 0;
+
+  .step{
+    height: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    vertical-align: top;
+    text-align: center;
+
+    input[type=text]{
+      position: relative;
+      z-index: 15;
+      width: 90%;
+      max-width: 300px;
+      margin-bottom: 30px;
+      padding: 0;
+      font-size: 1.5em;
+      text-align: center;
+      outline: none;
+      border: none;
+      @include property('border-radius', '0');
+      border-bottom: 2px solid $salmon;
+      background-color: rgba(255,255,255,0);
+    }
+
+    a.disabled{
+      cursor: default;
+      @include background-gradient('#aaa, #ccc');
+    }
+
+    #sceneSelection{
+      width: 90%;
+      height: 100%;
+      max-height: 300px;
+      margin-left: 5%;
+      text-align: left;
+      @include background-gradient('#f16a62, #fc8368');
+
+      #scenes, #userScenes{
+        display: inline-block;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        max-height: 200px;
+        overflow-y: scroll;
+
+
+        ul{
+          width: 100%;
+
+          li{
+            width: 90%;
+            height: 80px;
+            padding: 0;
+            margin: 0 0 20px 5%;
+
+            .scene, .userScene{
+              height: 100%;
+              width: 100%;
+              background-color: #fff;
+              overflow: hidden;
+
+              h4, p{
+                margin: 0;
+              }
+
+              h4{
+                font-size: 1em;
+                font-weight: $regular;
+                text-transform: uppercase;
+                margin-top: -3px;
+                margin-bottom: 5px;
+              }
+
+              p{
+                font-size: 0.9em;
+                font-weight: $light;
+              }
+            }
+          }
+        }
+
+        input[type=radio]{
+          display: none;
+          &:checked + div{
+            background-color: red;
+          }
+        }
+      }
+    }
+
+    #players{
+      height: 300px;
+    }
+  }
+}
+
+#finished{
+  position: absolute;
+  width: 90%;
+  top: 170px;
+  left: 5%;
+  text-align: center;
+}

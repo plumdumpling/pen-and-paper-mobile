@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>Pen &amp; Paper | v1.0.0</title>
+
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link rel="stylesheet" type="text/css" href="css/contentEditor.css">
+  <link rel="stylesheet" type="text/css" href="css/characterSheet.css">
+  <link rel="stylesheet" type="text/css" href="css/intro.css">
+  <link rel="stylesheet" type="text/css" href="css/drawTool.css">
+</head>
+
+<style type="text/css">
+#steps{
+  width: 320px;
+}
+
+.line.left{
+  margin-right: 160px;
+}
+
+.line.right{
+  margin-left: 160px;
+}
+</style>
+
+<style type="text/css">body{}</style>
+
+<body class="preload<% if(!userCharacters){ %> creation<% } %>">
+
+<a href="/"><img id="backBtn" src="/images/back.png"/></a>
+
+<!-- HEADER -->
+<header<% if(userCharacters){ %> class="player"<% } %>>
+  <h1>Charakter vorbereiten</h1>
+  <div id="startPreparation"<% if(!userCharacters && !ready){ %> class="hide"<% } %>>
+    <p>Bereite deinen Charakter für das Abenteuer vor.</p>
+
+    <!-- dotted line -->
+    <svg width="100%" height="6px" class="dottedLine">
+      <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+    </svg>
+  </div>
+  <div id="characterCreation"<% if(userCharacters || ready){ %> class="hide"<% } %>>
+    <p id="progressDescription"></p>
+
+    <% if(contentType==='characters'){ %><p id="characterpoints">Du hast noch <span id="cpCounter">0</span> Charakterpunkte</p><% } %>
+
+    <div id="progress">
+
+      <div class="line left">
+        <!-- dotted line -->
+        <svg width="100%" height="6px" class="dottedLine">
+          <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+        </svg>
+      </div>
+
+      <div class="line right">
+        <!-- dotted line -->
+        <svg width="100%" height="6px" class="dottedLine">
+          <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+        </svg>
+      </div>
+
+      <div id="steps">
+        <% for(var i=0; i<6; i++){ %>
+        <div class="progressStep<% if(i==0){ %> current<% } %>" data-step="<%= (i) %>"><img src="/images/content/<%= contentType %>/step<%= (i) %>.png" alt="step <%= (i) %>"/></div>
+        <% } %>
+      </div>
+
+      <br class="clear"/>
+    </div>
+  </div>
+</header>
+
+<div id="content"<% if(ready){ %> class="hide"<% } %>>
+  <div id="inner">
+    <% if(userCharacters){ %>
+    <div id="selectCharacter">
+      <!-- choose a prepared user character -->
+      <h3 id="uCharacterCount"></h3>
+      	<% if(userCharacters.length>0){ %>
+      	<select id="userCharacters">
+      		<% for(var i=0; i<userCharacters.length; i++){ %>
+      		<option value="u<%= userCharacters[i].id %>"<% if(userCharacters[i].inGame){ %> disabled<% } %>><%= userCharacters[i].name %></option>
+      		<% } %>
+      	</select>
+      	<% } %>
+        <a onClick="loadCharacter();" class="playerButton">Charakter laden</a>
+        <a onClick="newCharacter();" class="playerButton">Neuen Charakter erstellen</a>
+    </div>
+    <% } %>
+
+    <div id="stepOuter" data-stepsCount="6"<% if(userCharacters){ %> class="hide"<% } %>>
+    <!-- create a new character -->
+      <div class="step current" data-step="0" data-title="Stereotyp wählen">
+    		<% if(characters){ %>
+    		<h3>Wähle einen Stereotypen auf dem dein Charakter aufbauen soll.</h3>
+    			<% for(var i=0; i<characters.length; i++){ %>
+    			<div class="character" data-id="<%= characters[i].id %>">
+    				<h4><%= characters[i].name %></h4>
+    				<p><%= characters[i].description %></p>
+    			</div>
+    			<% } %>
+    		<% } %>
+    	</div><!--
+      --><% include manageContent/characterForm %>
+    </div>
+  </div>
+</div>
+<div id="finished"<% if(!ready){ %> class="hide"<% } %>><h3>Warte auf Mitspieler ...</h3></div>
+
+<footer>
+  <img src="/images/gradient.png" id="gradientFooter"/>
+
+  <div id="creationFooter">
+    <!-- dotted line -->
+    <svg width="100%" height="6px" class="dottedLine">
+      <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+    </svg>
+
+    <a id="next">Weiter</a><a id="save" class="hide">Speichern</a>
+  </div>
+</footer>
+
+<% include popupAndNotification %>
+
+<!-- saving message -->
+<div id="saving" class="hide">
+  <h3 id="savingMessage"><% if(contentType==='characters'){ %>Charakter<% } %><% if(contentType==='scenes'){ %>Szene<% } %><% if(contentType==='enemies'){ %>Gegner<% } %><% if(contentType==='items'){ %>Gegenstand<% } %> wird gespeichert</h3>
+</div>
+
+
+<!-- JavaScript - libraries and modules  -->
+<script src="js/jquery-1.11.2.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- JavaScript - custom scripts  -->
+<script type="text/javascript" src="js/basic.js"></script>
+<script type="text/javascript" src="js/drawTool.js"></script>
+<script type="text/javascript">
+var socket = io.connect('http://141.59.164.11:3000');
+var roomID = '<%= roomID %>';
+var characterLoaded = false;
+var imagepath;
+
+<% if(startLevel==0){ %>var cp = 20;<% } %>
+<% if(startLevel==1){ %>var cp = 40;<% } %>
+<% if(startLevel==2){ %>var cp = 60;<% } %>
+<% if(startLevel==3){ %>var cp = 80;<% } %>
+<% if(startLevel==4){ %>var cp = 100;<% } %>
+
+socket.emit('connectPlayer', {username:'<%= username %>', roomID:roomID, sessionID:'<%= sessionID %>'});
+
+/* ERROR HANDLING */
+socket.on('error', function (){ window.location.href = "/error"; });
+
+
+/* GAMEMASTER CONNECTION */
+var gamemasterConnected = true, adventurePaused = false;
+socket.on('gamemasterDisconnected', function (){
+  gamemasterConnected = false;
+  setTimeout(function (){
+    // pause adventure if gamemaster disconnected for more than 5 seconds
+    if(!gamemasterConnected) {
+      adventurePaused = true;
+      console.log('waiting for gamemaster to reconnect');
+    }
+  }, 5000);
+});
+socket.on('gamemasterConnected', function (){
+  gamemasterConnected = true;
+  if(adventurePaused){
+    adventurePaused = false;
+    console.log('gamemaster reconnected');
+  }
+});
+
+var createInGame = true;
+<% include js/stepChange.js %>
+
+
+/* INITIALIZE */
+$(document).ready(function (){
+  updateProgress();
+
+  // show characterpoints (CP)
+  document.getElementById('cpCounter').innerHTML = cp;
+  $('#iForm input[name="cp"]').val(cp);
+
+  <% if(userCharacters){ %>// get number of available user characters
+  var count = $('#userCharacters option:enabled').length;
+  console.log(count);
+  var text;
+  if(count > 1) text = count+' Charaktere stehen für das Abenteuer bereit.';
+  else text = count+' Charakter steht für das Abenteuer bereit.';
+  $('#uCharacterCount').html(text);<% } %>
+
+  <% if(contentType==='characters'){ %>
+  // add attribute images to skills
+  var attributes = [];
+  $('.skillInner').each(function (){
+    attributes = $(this).attr('data-attributes').split('-');
+    $(this).find('.images').eq(0).html('<img src="/images/charactersheet/'+attributes[0]+'_s.png"/><img src="/images/charactersheet/'+attributes[1]+'_s.png"/>');
+  });
+  <% } %>
+});
+
+
+// create new character
+function newCharacter (){
+  // update view
+  $('#selectCharacter').addClass('hide');
+  $('#startPreparation').addClass('hide');
+  $('header').removeClass('player');
+
+  $('body').addClass('creation');
+  $('#characterCreation').removeClass('hide');
+  $('#stepOuter').removeClass('hide');
+
+  // resize canvas to acutal size
+  resizeCanvas();
+}
+
+
+/* LOAD CHARACTER DATA */
+function loadCharacter (){
+  // check if available character is selected
+  if(!$('#userCharacters').val()) return false;
+
+  // get user character id from selected option
+  var characterID = $('#userCharacters').val();
+  requestCharacterData(characterID, false);
+}
+
+$(document).on('click touchend', '.character', function (){
+	// get clicked stereotype character id
+  console.log('choose stereotype');
+  var characterID = $(this).attr('data-id');
+	requestCharacterData(characterID, true);
+});
+
+function requestCharacterData (characterID, isNewCharacter){
+  // request character data from server
+  $.post('/prepare/'+roomID, {characterID:characterID}, function (response){
+    if(!response.err){
+		  var inputCount;
+
+      // fill with attributes data
+			<% for (var i=0; i<attributes.name.length; i++){ %>// data for attribute "<%= attributes.name[i] %>"
+			inputCount = 0;
+			$('input[type=checkbox][name=<%= attributes.name[i] %>]').each(function (){
+				// check and enable as many checkboxes as the value of the attribute says
+				if(inputCount<response.attributeValues.<%= attributes.name[i] %>){
+					$(this).prop('checked', true);
+					$(this).removeClass('disabled');
+					inputCount++;
+				}
+				else return false;
+			});<% } %>
+
+      // fill with skill data
+			<% for (var i=0; i<skills.name.length; i++){ %>// data for skill "<%= skills.name[i] %>"
+			inputCount = 0;
+			$('input[type=checkbox][name=<%= skills.name[i] %>]').each(function (){
+        // check if skill is set
+        if(response.skillValues.<%= skills.name[i] %> > 0) $(this).parent().addClass('checked');
+				// check as many checkboxes as the value of the skill says
+				if(inputCount<response.skillValues.<%= skills.name[i] %>){
+					$(this).prop('checked', true);
+					inputCount++;
+				}
+				else return false;
+			});<% } %>
+
+      // fill with characteristics data
+      // advantages
+			<% for (var i=0; i<characteristics.advantages.name.length; i++){ %>// check checkbox if advantage "<%= characteristics.advantages.name[i] %>" is selected
+			if(response.advanValues.<%= characteristics.advantages.name[i] %>){
+        $('input[type=checkbox][name=<%= characteristics.advantages.name[i] %>]').prop('checked', true);
+        $('input[type=checkbox][name=<%= characteristics.advantages.name[i] %>]').parent().addClass('checked');
+      }<% } %>
+      // disadvantages
+			<% for (var i=0; i<characteristics.disadvantages.name.length; i++){ %>// check checkbox if disadvantage "<%= characteristics.disadvantages.name[i] %>" is selected
+			if(response.disadvanValues.<%= characteristics.disadvantages.name[i] %>){
+        $('input[type=checkbox][name=<%= characteristics.disadvantages.name[i] %>]').prop('checked', true);
+        $('input[type=checkbox][name=<%= characteristics.disadvantages.name[i] %>]').parent().addClass('checked');
+      }<% } %>
+
+
+      // fill with informations if available
+      if(response.informations){
+        $('input[name=name]').val(response.informations.name);
+        $('input[name=age]').val(response.informations.age);
+        $('input[name=occupation]').val(response.informations.occupation);
+        $('input[name=origin]').val(response.informations.origin);
+        $('textarea[name=description]').val(response.informations.description);
+
+        if(response.informations.imagepath){
+          imagepath = response.informations.imagepath;
+          var canvas = document.getElementById("canvas");
+          var ctx = canvas.getContext("2d");
+          var loadedImage = new Image();
+          loadedImage.src = imagepath;
+          loadedImage.onload = function (){
+          	ctx.drawImage(loadedImage, 0, 0, loadedImage.width, loadedImage.height, 0, 0, actualWidth, actualHeight);
+          }
+        }
+      }
+
+      if(isNewCharacter){
+        // reduce character points for stereotype data
+        cp -= 18;
+        document.getElementById('cpCounter').innerHTML = cp;
+        $('#iForm input[name="cp"]').val(cp);
+        // go on in character creation
+        scrollTo(1);
+      }
+      else{
+        // finish character preparation
+        characterLoaded = true;
+        finish(false);
+
+        // // update view
+        $('#content').addClass('hide');
+        $('#finished').removeClass('hide');
+      }
+    }
+    else{
+      popup('Hoppla, da lief was schief!', 'Bitte versuche es erneut und lade die Seite gegebenenfalls neu.');
+    }
+  }).fail(function (){
+    popup('Hoppla, da lief was schief!', 'Bitte versuche es erneut und lade die Seite gegebenenfalls neu.');
+  });
+}
+
+
+/* SAVE NEW CREATED CHARACTER */
+$(document).on('click', '#save', function (){
+  // check if everything is filled out
+  if(formComplete()){
+    // show saving message
+    $('#saving').removeClass('hide');
+
+    // check if canvas is empty
+    if(document.getElementById('canvas').toDataURL() == document.getElementById('blankCanvas').toDataURL()){
+      // save data without image
+      console.log('canvas is empty - save without image');
+      // collect character data from form
+      imagepath = '/images/content/characters/default.png';
+      var data = collectCharacterData(imagepath);
+
+      // save content in database
+      finish(data);
+    }
+    else{
+      // save image
+      $.post('/draw/saveImage', {imageData:canvas.toDataURL(), imagepath:null}, function (response){
+        if(response.err) {
+          popup('Hoppla, da lief was schief!', 'Dein Bild wurde geklaut. Bitte versuche erneut zu speichern.');
+        }
+        else{
+          // collect character data from form
+          imagepath = response.imagepath;
+          var data = collectCharacterData(response.imagepath);
+
+          // save content in database
+          finish(data);
+        }
+      }).fail(function (){
+        popup('Hoppla, da lief was schief!', 'Dein Bild wurde geklaut. Bitte versuche erneut zu speichern.');
+      });
+    }
+  }
+});
+
+
+/* FINISH CHARACTER CREATION */
+function finish (data){
+  console.log('finish character - loaded '+characterLoaded);
+  if(!characterLoaded){
+  	// send character data to server
+  	$.ajax({
+  		url: '/save/characters',
+  		type: 'POST',
+  		contentType: 'application/x-www-form-urlencoded',
+  		data: {data: data},
+  		dataType: 'json',
+  		success: function (response){
+  			if(!response.err){
+  				// inform the gamemaster of the ready player character
+  				socket.emit('characterReady', {username:'<%= username %>', roomID:roomID, charactername:$('input[name="name"]').val(), characterID:response.savedCharacterID, imagepath:imagepath});
+
+  				// hide content and show info
+  				$('#content').addClass('hide');
+  				$('#finished').removeClass('hide');
+
+          // update view
+          $('#selectCharacter').removeClass('hide');
+          $('#startPreparation').removeClass('hide');
+          $('header').addClass('player');
+
+          $('body').removeClass('creation');
+          $('#characterCreation').addClass('hide');
+          $('#stepOuter').addClass('hide');
+
+          // hide saving message
+          $('#saving').addClass('hide');
+  			}
+  			else{
+          popup('Hoppla, da lief was schief!', 'Dein Charakter möchte dem Spiel wohl noch nicht beitreten. Bitte versuche es erneut.');
+  			}
+  		},
+  		error: function (xhr, status, error){
+        popup('Hoppla, da lief was schief!', 'Dein Charakter möchte dem Spiel wohl noch nicht beitreten. Bitte versuche es erneut.');
+  		}
+  	});
+  }
+  else{
+    $.ajax({
+  		url: '/getReady',
+  		type: 'POST',
+  		contentType: 'application/x-www-form-urlencoded',
+  		success: function (response){
+        // inform the gamemaster of the ready player character
+        socket.emit('characterReady', {username:'<%= username %>', roomID:roomID, charactername:$('input[name="name"]').val(), characterID:$('#userCharacters').val().split('u')[1], imagepath:imagepath});
+
+        // hide content and show info
+        $('#content').addClass('hide');
+        $('#finished').removeClass('hide');
+  		},
+  		error: function (xhr, status, error){
+        popup('Hoppla, da lief was schief!', 'Dein Charakter möchte dem Spiel wohl noch nicht beitreten. Bitte versuche es erneut.');
+  		}
+  	});
+  }
+}
+
+
+/* FORM VALIDATION */
+function formComplete (){
+  var saveIt = true;
+  $('#iForm input[type=text], #iForm textarea').each(function (){
+    if($(this).val().length <= 0){
+      scrollTo(4);
+      popup('Bitte fülle zuerst alle Felder aus.');
+      saveIt = false;
+      return;
+    }
+  });
+  if(saveIt){
+    $('#iForm input[type=number]').each(function (){
+      if(!$.isNumeric($(this).val())){
+        scrollTo(4);
+        popup('Bitte gib ein gültiges Alter für deinen Charakter ein.');
+        saveIt = false;
+        return;
+      }
+    });
+  }
+
+  return saveIt;
+}
+
+
+<% include js/collectForDb.js %>
+
+
+/* START THE ADVENTURE */
+socket.on('startAdventure', function (data){
+	if(data.roomID === roomID) window.location.href = "/play/"+data.roomID;
+});
+
+socket.on('adventureClosed', function (){
+  notification('Das Spiel wurde beendet.');
+  setTimeout(function(){ window.location.href = "/close/"+roomID }, 2000);
+});
+
+</script>
+<script src="js/characterCreation.js"></script>
+
+</body>
+</html>

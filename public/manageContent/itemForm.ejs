@@ -1,0 +1,33 @@
+<!-- STEP 1 - ITEM IMAGE -->
+<div class="step current" data-step="1" data-title="Aussehen">
+	<h3>Male deinen Gegenstand.</h3>
+
+	<div id="canvasOuter">
+		<div id="canvasInner">
+			<div id="maxCanvas"></div>
+			<canvas id="canvas" width="600" height="600" style="border:1px solid #fff;"></canvas>
+		</div>
+	</div>
+	<!-- blank canvas for checking if something was drawn -->
+	<canvas id="blankCanvas" width="600" height="600" style="display:none"></canvas>
+</div><!--
+
+STEP 2 - ITEM INFORMATIONS
+--><div class="step" data-step="2" data-title="Informationen">
+	<h3>Gib dem Gegenstand mehr Informationen.</h3>
+
+	<label>Name des Gegenstandes</label><input type="text" name="name" maxlength="30"<% if(response){ %> value="<%= response.name %>"<% } %>><br>
+	<label>Beschreibung</label><textarea type="text" name="description" maxlength="100" rows="10"><% if(response){ %><%= response.description %><% } %></textarea>
+</div><!--
+
+STEP 3 - ITEM CATEGORY
+--><div class="step" data-step="3" data-title="Kategorie">
+	<h3>Ordne deinen Gegenstand einer Kategorie zu.</h3>
+
+	<label>Kategorie</label><select name="category">
+		<option value="0" selected>Kategorie wählen</option>
+		<% for(var i=0; i<categories.length; i++){ %>
+		<option value="<%= categories[i].id %>"<% if(response.category===categories[i].id){ %> selected<% } %>><%= categories[i].name %></option>
+		<% } %>
+	</select>
+</div>

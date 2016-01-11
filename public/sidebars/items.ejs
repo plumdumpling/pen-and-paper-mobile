@@ -1,0 +1,27 @@
+<div id="items" data-requested="false">
+  <div class="top">
+    <h1>Gegenstände</h1>
+    <div class="contentCollection" data-scrollbar="dark"><div class="collectionInner"></div></div>
+    <a onClick="closeSidebarToSendContent();" class="confirmBtn disabled">Gegenstände an Spieler senden</a>
+  </div>
+  <!-- dotted line -->
+  <svg width="100%" height="6px" class="dottedLine">
+    <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+  </svg>
+  <div class="bottom">
+    <!-- category list -->
+    <div class="categoryOuter">
+      <a class="selectFrom dbCont" onClick="toggleContent(this, 'items');"></a>
+      <div class="dropDownOuter">
+        <select name="sceneCategory" onchange="categoryChanged(this, 'items');">
+          <option value="0" selected>Alle Gegenstände</option>
+        </select>
+      </div>
+      <br class="clear"/>
+    </div>
+
+    <!-- contents -->
+    <div class="contents"></div>
+    <div class="userContents hide"></div>
+  </div>
+</div>

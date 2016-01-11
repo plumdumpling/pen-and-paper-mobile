@@ -1,0 +1,324 @@
+// out: ../public/css/main.css
+
+@import "colors";
+@import "fonts";
+@import "animations";
+@import "buttons";
+@import "crossbrowser";
+
+@import "scrollbar";
+
+*{
+  border: 0;
+}
+
+a, button{
+  cursor: pointer;
+}
+
+ul{
+  display: inline;
+  list-style-type: none;
+}
+
+.clear{
+  clear: both;
+}
+
+.hide{
+  display: none !important;
+}
+
+body, html{
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+
+/* FONTS */
+*{
+  font-family: $defaultFont;
+  font-weight: $light;
+  color: $slate;
+}
+
+h1{
+  font-family: $handwrittenFont;
+  font-weight: $regular;
+  font-size: 3em;
+  text-align: center;
+  margin: 0;
+}
+
+h2{
+  text-transform: uppercase;
+  font-weight: $regular;
+  letter-spacing: 1px;
+}
+
+h3{
+  font-family: $handwrittenFont;
+  font-weight: $regular;
+  font-size: 2em;
+  text-align: center;
+}
+
+a{
+  text-decoration: none;
+}
+
+
+/* SIDEBAR */
+#sidebar{
+  position: absolute;
+  z-index: 25;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  right: -100%;
+  margin-right: 80px;
+  text-align: right;
+  @include transition('all 0.7s ease');
+
+  #buttons{
+    position: absolute;
+    display: inline-block;
+    width: 80px;
+    left: 0;
+
+    button{
+      width: 60px;
+      height: 60px;
+      margin: 10px 20px 10px 0;
+      background-color: rgba(255,255,255,0);
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-size: contain;
+
+      &[data-content=settings]{ background-image: url("/images/navBtns/settings.png"); }
+      &[data-content=settingsDark]{ background-image: url("/images/navBtns/settings2.png"); }
+
+      &[data-content=drawTool]{ background-image: url("/images/navBtns/brush.png"); }
+      &[data-content=drawToolDark]{ background-image: url("/images/navBtns/brush2.png"); }
+
+      &[data-content=character]{ background-image: url("/images/navBtns/character.png"); }
+      &[data-content=inventory]{ background-image: url("/images/navBtns/inventory.png"); }
+
+      &[data-content=items]{ background-image: url("/images/navBtns/items.png"); }
+      &[data-content=enemies]{ background-image: url("/images/navBtns/enemies.png"); }
+      &[data-content=scenes]{ background-image: url("/images/navBtns/scenes.png"); }
+      &[data-content=trial]{ background-image: url("/images/navBtns/dice.png"); }
+    }
+  }
+
+  #sidebarContent{
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    height: 100%;
+    top: 0;
+    text-align: center;
+    float: right;
+    background-color: $slate;
+
+    div{
+      display: inline-block;
+    }
+  }
+
+  &.open{
+    right: 0;
+    margin-right: 0;
+
+    #buttons{
+      position: relative;
+    }
+  }
+}
+
+
+/* POP-UPS AND NOTIFICATIONS */
+.popup{
+  position: absolute;
+  z-index: 45;
+  width: 300px;
+  max-width: 90%;
+  top: 50px;
+  left: 50%;
+  margin-left: -20px;
+
+  div{
+    width: 100%;
+    margin-left: -50%;
+    padding: 20px;
+    text-align: center;
+    background-color: #fff;
+    background-image: url("/images/gradient.png");
+    background-position: bottom;
+    background-repeat: no-repeat;
+    background-size: contain;
+    @include animation('jelly 1s linear normal both');
+
+    h3{
+      margin: 0;
+    }
+
+    a{
+      width: 40% !important;
+      margin: 10px 0;
+      @include ghostButton();
+      @include background-gradient('#33373f, #4a5a64');
+    }
+  }
+}
+
+#shadowBox{
+  display: none;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background-color: rgba(51,55,63,0.8);
+  @include transition('300ms linear normal both');
+
+  &.visible{ display: inline; }
+}
+
+
+/* BUTTONS */
+.gamemasterButton{
+  @include ghostButton();
+  @include background-gradient('#f16a62, #fc8368');
+  display: block;
+  @include property('border-radius','3px');
+  border: none;
+}
+
+.playerButton{
+  @include ghostButton();
+  @include background-gradient('#15a37c, #14c288');
+  display: block;
+  @include property('border-radius','3px');
+  border: none;
+}
+
+#backBtn{
+  position: fixed;
+  left: 16px;
+  top: 16px;
+  height: 24px;
+  z-index: 30;
+}
+
+
+/* HEADER */
+header{
+  position: fixed;
+  z-index: 10;
+  width: 100%;
+  height: 140px;
+  top: 0;
+  padding: 10px 40px;
+  box-sizing: border-box;
+  text-align: center;
+  background-color: $slate;
+  @include property('box-shadow', '0 2px 10px #1b1d22');
+
+  svg.dottedLine{
+    position: absolute;
+    left: 0;
+    top: 138px;
+  }
+
+  *{
+    color: #fff;
+  }
+
+  h1{
+    line-height: 1em;
+    margin: 0;
+  }
+
+  h3{
+    margin: 0 0 10px;
+    font-size: 1.5em;
+  }
+
+  p{
+    font-weight: $regular;
+    margin: 0px;
+  }
+}
+
+
+/* CONTENT */
+#content{
+  position: relative;
+  height: 100%;
+  padding-top: 240px;
+
+  #wrapper{
+    position: relative;
+    height: 100%;
+
+    #inner{
+      position: absolute;
+      top: 110px;
+      bottom: 0;
+      z-index: 5;
+      width: 90%;
+      overflow-y: auto;
+    }
+  }
+}
+
+
+/* STEPS */
+#stepOuter{
+  &[data-stepsCount='1']{
+    width: 100%;
+    .step{
+      width: 100%;
+    }
+  }
+  &[data-stepsCount='2']{
+    width: 200%;
+    .step{
+      width: 50%;
+    }
+  }
+  &[data-stepsCount='3']{
+    width: 300%;
+    .step{
+      width: 33.33%;
+    }
+  }
+  &[data-stepsCount='4']{
+    width: 400%;
+    .step{
+      width: 25%;
+    }
+  }
+  &[data-stepsCount='5']{
+    width: 500%;
+    .step{
+      width: 20%;
+    }
+  }
+  &[data-stepsCount='6']{
+    width: 600%;
+    .step{
+      width: 16.65%;
+    }
+  }
+}

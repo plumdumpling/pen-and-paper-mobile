@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>Pen &amp; Paper | v1.0.0</title>
+
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link rel="stylesheet" type="text/css" href="css/connect.css">
+</head>
+
+<body class="preload">
+
+<a href="/"><img id="backBtn" src="/images/back.png"/></a>
+
+<!-- HEADER -->
+<header class="gamemaster">
+  <h1>Spiel leiten</h1>
+
+  <p>Verbinde dich als Spielleiter mit den übrigen Spielern und führe sie durch das Abenteuer.</p>
+
+  <!-- dotted line -->
+  <svg width="100%" height="6px" class="dottedLine">
+    <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+  </svg>
+</header>
+
+<div id="wrapper">
+  <div id="stepOuter" data-stepsCount="3">
+    <div class="step s1">
+      <h3>Starte ein neues Abenteuer<% if(savegames){ %> ...<% } %></h3>
+
+      <a id="newBtn" class="gamemasterButton">Neues Spiel erstellen</a>
+
+      <% if(savegames){ %><br/><br/><h3>... oder wähle einen Spielstand</h3><% } %>
+
+      <div id="loadDIV">
+      <% if(savegames){ %>
+      	<% if(savegames.length>0){ %>
+      	<select name="savegame">
+          <option value="0" selected>Spielstand wählen ...</option>
+      		<% for(var i=0; i<savegames.length; i++){ %>
+      		<option value="<%= savegames[i].id %>"><%= savegames[i].name %></option>
+      		<% } %>
+      	</select><br/>
+      	<% } %>
+        <a id="loadBtn" class="gamemasterButton">Spiel laden</a>
+      <% } %>
+      </div>
+    </div><!--
+
+    --><div class="step s2">
+      <div>
+        <h3>Spieler können mit dem <br class="mobile"/>folgendem Code dem Spiel beitreten</h3>
+        <p>Verbindungscode:</p>
+        <p id="code"><% if(roomID){ %><%= roomID %><% } %></p>
+        <br/>
+        <p>Beigetretene Spieler:</p>
+        <div id="players"></div>
+      </div>
+      <br/>
+      <a id="startBtn" class="gamemasterButton disabled" onClick="connected();">Spiel starten</a>
+    </div><!--
+
+    --><div class="step s3">
+      <form id="chooseStartLevel">
+      	<h3>Wähle auf welchem Level <br class="mobile"/>die Spieler starten sollen.</h3>
+      	<input type="radio" name="characterLevel" value="0"><label data-value="0"></label><label data-value="0">Taugenichts</label><br/>
+      	<input type="radio" name="characterLevel" value="1"><label data-value="1"></label><label data-value="1">Otto Normal (empfohlen)</label><br/>
+      	<input type="radio" name="characterLevel" value="2"><label data-value="2"></label><label data-value="2">Könner</label><br/>
+      	<input type="radio" name="characterLevel" value="3"><label data-value="3"></label><label data-value="3">Toller Hecht</label><br/>
+      	<input type="radio" name="characterLevel" value="4"><label data-value="4"></label><label data-value="4">Superheld</label><br/>
+        <br/>
+        <a class="gamemasterButton" onClick="startIntro(true);">Start</a>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer><img src="/images/gradient.png"/></footer>
+
+
+<!-- JavaScript - libraries and modules  -->
+<script src="js/jquery-1.11.2.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- JavaScript - custom scripts  -->
+<script type="text/javascript">
+var socket = io.connect('http://141.59.164.11:3000');
+var roomID<% if(roomID){ %> = '<%= roomID %>'<% } %>,
+  <% if(players){ %>players = <%- JSON.stringify(players) %>,<% }else{ %>players = [],<% } %>
+	activePlayers = 0,
+  loadedWithCharacters = false,
+  savegame = false;
+
+/* ERROR HANDLING */
+socket.on('error', function (){ window.location.href = "/error"; });
+
+
+$(document).ready(function (){
+  updatePlayerList();
+  <% if(roomID){ %>
+    console.log(roomID);
+  var pos = $('.step').width();
+  $('#wrapper').scrollLeft(pos);
+  <% } %>
+});
+
+
+/* UPDATE PLAYER LIST */
+socket.on('updatePlayerList', function (data){
+  players = data.players;
+  activePlayers = 0;
+
+  updatePlayerList();
+});
+
+function updatePlayerList() {
+  console.log('updatePlayerList');
+  console.log(players);
+  var playersDiv = document.getElementById('players');
+  playersDiv.innerHTML = '';
+
+  for (var i = players.length - 1; i >= 0; i--) {
+		if(players[i].connected){
+			var div = document.createElement('div');
+	    div.className = 'player';
+	    div.id = players[i].name;
+	    div.innerHTML = '<p>'+players[i].name+'</p>';
+
+	    document.getElementById('players').appendChild(div);
+
+	    activePlayers++;
+    }
+  }
+
+  if(activePlayers>0) $('#startBtn').removeClass('disabled');
+  else $('#startBtn').addClass('disabled');
+}
+
+
+/* SCROLL TO */
+function scrollTo (step){
+	var pos = $('.step').width()*(step-1);
+  $('#wrapper').animate({scrollLeft: pos}, 800);
+}
+
+
+/* START LEVEL */
+$(document).on('click', '#chooseStartLevel label', function (){
+  var value = $(this).attr('data-value');
+  $('input[type=radio][name=characterLevel]').each(function (){
+    if($(this).val() == value) $(this).prop('checked', true);
+  });
+});
+
+
+/* HOST THE GAME */
+$(document).on('click', '#newBtn', function (){
+  host();
+});
+
+function host (){
+	$.post('/host', {savegame:savegame}, function (response){
+		console.log(response);
+		if(response.err) {
+      popup('Hoppla, da lief was schief!', 'Bitte versuche es erneut.');
+		}
+		else if(response.roomID){
+			roomID = response.roomID;
+      console.log(document.getElementById('code'));
+      // show connect code
+			var codeSpan = document.getElementById('code');
+      codeSpan.innerHTML = roomID;
+      // scroll to next step
+      scrollTo(2);
+      // host via web sockets
+      if(response.characterIDs.length > 0) loadedWithCharacters = true;
+      socket.emit('hostGame', {username:'<%= username %>', roomID:roomID, characterIDs:response.characterIDs});
+		}
+	}).fail(function (){
+    popup('Hoppla, da lief was schief!', 'Bitte versuche es erneut.');
+	});
+}
+
+$(document).on('click', '#loadBtn', function (){
+  savegame = $('[name="savegame"]').val();
+  if(savegame!=0) host();
+});
+
+
+/* START GAME INTRODUCTION */
+function connected (){
+  // check if button is disabled
+  if(!$('#startBtn').hasClass('disabled')){
+    // check game was loaded with characters and start level
+    if(loadedWithCharacters){
+      // jump over the next steps - characters are already selected
+      startIntro(false);
+    }
+    else{
+      // let the gamemaster choose the start level
+      scrollTo(3);
+    }
+  }
+}
+
+function startIntro(selectCharacters){
+  // check if characters are already selected
+  if(selectCharacters){
+    if($('input[type="radio"]:checked').size()>0){
+  		var characterLevel = $('input[type="radio"][name="characterLevel"]:checked').val();
+      console.log('characterLevel: '+characterLevel);
+  		socket.emit('startIntro', {roomID:roomID, characterLevel:characterLevel});
+  	}
+  	else popup('Wähle das Startlevel für die Spieler zur Charaktererstellung.');
+  }
+  else{
+    // start adventure immediately
+    socket.emit('startAdventure', {roomID:roomID, startScene:false});
+  }
+}
+
+socket.on('startIntro', function (data){
+	if(data.roomID === roomID) window.location.href = "/prepare/"+roomID;
+});
+
+socket.on('startAdventure', function (data){
+  if(data.roomID === roomID) window.location.href = "/play/"+roomID;
+});
+
+socket.on('adventureClosed', function (){
+  popup('Das Spiel wurde beendet.');
+  setTimeout(function(){ window.location.href = "/close/"+roomID }, 2000);
+});
+
+
+</script>
+
+</body>
+</html>

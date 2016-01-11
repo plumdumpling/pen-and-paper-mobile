@@ -1,0 +1,26 @@
+<div id="scenes" data-requested="false">
+  <div class="top">
+    <h1>Szenen</h1>
+    <a onClick="closeSidebarToSendContent();" class="confirmBtn disabled">Mit ausgewählter Szene fortfahren</a>
+  </div>
+  <!-- dotted line -->
+  <svg width="100%" height="6px" class="dottedLine">
+    <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+  </svg>
+  <div class="bottom">
+    <!-- category list -->
+    <div class="categoryOuter">
+      <a class="selectFrom dbCont" onClick="toggleContent(this, 'scenes');"></a>
+      <div class="dropDownOuter">
+        <select name="sceneCategory" onchange="categoryChanged(this, 'scenes');">
+          <option value="0" selected>Alle Szenen</option>
+        </select>
+      </div>
+      <br class="clear"/>
+    </div>
+
+    <!-- contents -->
+    <div class="contents"></div>
+    <div class="userContents hide"></div>
+  </div>
+</div>

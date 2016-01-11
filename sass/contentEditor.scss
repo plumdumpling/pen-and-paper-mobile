@@ -1,0 +1,237 @@
+// out: ../public/css/contentEditor.css
+
+@import "colors";
+@import "fonts";
+@import "animations";
+@import "buttons";
+@import "crossbrowser";
+
+@import "charactersheet";
+
+
+/* CREATE AND EDIT CONTENT */
+textarea{ resize: none; }
+
+body, html{
+  background-color: $slateBlue;
+}
+
+header{
+  #progressDescription .stepCount{
+    color: $appleGreen !important;
+    font-weight: $bold;
+  }
+
+  #progress{
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 100px;
+    margin: auto;
+    display: inline-block;
+
+
+    .line{
+      height: 20px;
+      width: 50%;
+      margin-top: 39px;
+      overflow: hidden;
+
+      svg.dottedLine{
+        top: 0;
+      }
+
+      &.left{
+        position: absolute;
+        right: 50%;
+      }
+      &.right{
+        position: absolute;
+        left: 50%;
+      }
+    }
+
+    #steps{
+      position: relative;
+      margin: 0 auto;
+      text-align: center;
+
+      .progressStep{
+        width: 50px;
+        height: 80px;
+        display: inline-block;
+        background-image: url("/images/content/circle.png");
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: 0 0;
+        @include transition('width 0.5s ease, height 0.5s ease, background-size 0.3s ease 0.5s');
+
+        &.current{
+          width: 80px;
+          height: 80px;
+          background-size: contain;
+          @include transition('width 0.5s ease, height 0.5s ease, background-size 0.3s ease 0.5s');
+        }
+
+        img{
+          width: 50px;
+          height: 57px;
+          margin-top: 10px;
+        }
+      }
+    }
+  }
+}
+
+#content{
+  position: absolute;
+  display: block;
+  width: 100%;
+  height: auto;
+  top: 0;
+  bottom: 100px;
+  left: 0;
+  padding-top: 190px;
+
+  #inner{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    margin: auto;
+    overflow: hidden;
+
+    #stepOuter{
+      position: relative;
+      padding-top: 50px;
+      height: 100%;
+      padding: 0;
+
+      .step{
+        display: inline-block;
+        box-sizing: border-box;
+        height: 100%;
+        margin: 0;
+        padding: 0 20px;
+        vertical-align: top;
+        overflow-y: auto;
+
+        h3{
+          margin: 0 0 20px;
+        }
+
+        label{
+          width: 25%;
+          margin-left:5%;
+          margin-bottom: 20px;
+          padding-right: 10px;
+          display: inline-block;
+          text-align: right;
+          text-transform: uppercase;
+          color: #fff;
+        }
+
+        input[type=text], input[type=number], textarea, #sceneDescription{
+          display: inline-block;
+          width: 55%;
+          margin-top: 0;
+          margin-right: 5;
+          padding-left: 10px;
+          font-size: 1em;
+          font-weight: $light;
+          color: #fff;
+          outline: none;
+          border: none;
+          border-left: 2px solid $lightBlue;
+          background-color: rgba(255,255,255,0);
+        }
+
+        input[type=text]{
+          vertical-align: middle;
+        }
+
+        textarea{
+          vertical-align: top;
+
+          &[name=description]{
+            height: 100px;
+          }
+        }
+
+        select{
+          @include property('appearance', 'none');
+          @include dropDownLight();
+        }
+
+        #sceneDescription{
+          vertical-align: top;
+          height: 100%;
+        }
+      }
+    }
+  }
+
+  h3,p,a{
+    color: #fff;
+  }
+}
+
+#footer{
+  position: fixed;
+  z-index: 10;
+  width: 100%;
+  bottom: 0;
+  text-align: center;
+  padding: 20px 0 30px;
+  background-color: $slate;
+  @include property('box-shadow', '0 -2px 10px #1b1d22');
+
+  svg.dottedLine{
+    position: absolute;
+    left: 0;
+    margin-top: -22px;
+  }
+
+  #next{
+    @include ghostButton();
+    &.hide{ display: none; }
+  }
+  #save{
+    @include whiteButton();
+    &.hide{ display: none; }
+  }
+}
+
+
+#keywordsInfo{
+  position: absolute;
+  z-index: 45;
+  width: 90%;
+  max-width: 400px;
+  height: 100%;
+  top: 0;
+  left: 50%;
+  padding-top: 160px;
+
+  #keywordsScenes div{
+    width: 100%;
+    margin-left: -50%;
+    background-color: #fff;
+
+    p div{
+      margin: 0;
+    }
+  }
+}
+
+#saving{
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  color: #fff;
+  background-color: rgba(51,55,63,0.8);
+}

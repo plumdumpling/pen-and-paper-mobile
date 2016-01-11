@@ -1,0 +1,12 @@
+// main: base.scss
+// google fonts
+@import url(http://fonts.googleapis.com/css?family=Amatic+SC:400,700);
+@import url(http://fonts.googleapis.com/css?family=Oswald:300,400,700);
+
+// define some font variables
+$handwrittenFont: 'Amatic SC', cursive;
+$defaultFont: 'Oswald', sans-serif;
+
+$light: 300;
+$regular: 400;
+$bold: 700;

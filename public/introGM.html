@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>Pen &amp; Paper | v1.0.0</title>
+
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link rel="stylesheet" type="text/css" href="css/intro.css">
+</head>
+
+<body>
+
+<a href="/"><img id="backBtn" src="/images/back.png"/></a>
+
+<!-- HEADER -->
+<header class="preload gamemaster">
+  <h1>Abenteuer vorbereiten</h1>
+  <p>Treffe noch ein paar letzte Vorbereitungen bevor das Abenteuer beginnt.</p>
+
+  <!-- dotted line -->
+  <svg width="100%" height="6px" class="dottedLine">
+    <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+  </svg>
+</header>
+
+
+<div id="wrapper">
+  <div id="stepOuter" data-stepsCount="3">
+    <div class="step s1">
+      <h3>Benenne dein Abenteuer</h3>
+      <input type="text" name="gamename" maxlength="30" placeholder="Name des Abenteuers"/>
+
+      <a id="nameGameBtn" class="gamemasterButton">Weiter</a>
+    </div><!--
+    --><div class="step s2">
+      <h3>Wähle die Szene in der dein Abenteuer beginnen soll.</h3>
+      <div id="sceneSelection">
+        <a id="dbContentBtn" onClick="showUContent();"></a>
+        <a id="uContentBtn" class="hide" onClick="showDbContent();"></a><br/>
+
+        <div id="scenes">
+          <ul>
+          <% for(var i=0; i<scenesData.scenes.length; i++){ %><li>
+          <input type="radio" value="<%= scenesData.scenes[i].id %>" name="startScene">
+          <div class="scene">
+            <div class="image" style="background-image:url('<%= scenesData.scenes[i].imagepath %>');"></div>
+            <div class="text">
+              <h4><%= scenesData.scenes[i].name %></h4>
+              <p><%= scenesData.scenes[i].description %></p>
+            </div><br class="clear"/>
+          </div>
+          </li><% } %>
+        </ul>
+        </div>
+        <div id="userScenes" class="hide">
+          <ul>
+          <% if(scenesData.userScenes.length<=0){ %><li>Leider wurden noch keine Szenen selbst erstellt.</li><% } %>
+          <% for(var i=0; i<scenesData.userScenes.length; i++){ %><li>
+          <input type="radio" value="u<%= scenesData.userScenes[i].id %>" name="startScene">
+          <div class="userScene">
+            <div class="image" style="background-image:url('<%= scenesData.userScenes[i].imagepath %>');"></div>
+            <div class="text">
+              <h4><%= scenesData.userScenes[i].name %></h4>
+              <p><%= scenesData.userScenes[i].description %></p>
+            </div><br class="clear"/>
+          </div>
+          </li><% } %>
+          </ul>
+        </div>
+      </div>
+
+      <a id="chooseSceneBtn" class="gamemasterButton">Szene wählen</a>
+    </div><!--
+    --><div class="step s3">
+      <h3>Beginne das Abenteuer sobald alle Charaktere bereit sind.</h3>
+      <div id="players"></div>
+      <a id="startBtn" class="gamemasterButton disabled" onClick="startAdventure();">Abenteuer beginnen</a>
+    </div>
+  </div>
+</div>
+
+<footer><img src="/images/gradient.png"/></footer>
+
+<% include popupAndNotification %>
+
+<!-- JavaScript - libraries and modules  -->
+<script src="js/jquery-1.11.2.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- JavaScript - custom scripts  -->
+<script type="text/javascript" src="js/basic.js"></script>
+<script type="text/javascript">
+var socket = io.connect('http://141.59.164.11:3000');
+var roomID = '<%= roomID %>';
+
+socket.emit('connectGamemaster', {username:'<%= username %>', roomID:roomID});
+
+/* ERROR HANDLING */
+socket.on('error', function (){ window.location.href = "http://141.59.164.11:3000/error"; });
+
+
+/* UPDATE PLAYER LIST */
+var players = [];
+socket.on('updatePlayerList', function (data){
+  console.log('updatePlayerList');
+  console.log(data.players);
+  // update local players array
+  players = data.players;
+
+  // clear visible players list
+  var playersDiv = document.getElementById('players');
+  playersDiv.innerHTML = '';
+
+  for(var i=players.length-1; i>=0; i--){
+  	// create a div with class player for every player in room
+    var div = document.createElement('div');
+    div.className = 'player';
+		// add class disabled if player is disconnected
+    if(!players[i].connected) $(div).addClass('disabled');
+		// add class ready if players character creation is complete
+    if(players[i].ready) $(div).addClass('ready');
+    // set div id to players username to identify
+    div.id = players[i].name;
+    // display the username in div
+    div.innerHTML = '<p>'+players[i].name+'</p>';
+    // add div to players list
+    document.getElementById('players').appendChild(div);
+  }
+  // check if each player finished its character creation
+  charactersComplete();
+});
+
+
+/* PLAYER'S CHARACTER CREATION COMPLETE */
+socket.on('characterReady', function(data){
+  console.log('Der Spieler '+data.username+' wartet mit dem Charakter '+data.charactername+' auf das Abenteuer.');
+});
+
+function charactersComplete (){
+	// check if all players are connected and ready for play
+	var complete = true;
+
+	$('.player').each(function (){
+		if(!$(this).hasClass('ready') || $(this).hasClass('disabled')){
+			complete = false;
+			return false;
+		}
+	});
+	// add start button if everybody is ready
+  if(complete) $('#startBtn').removeClass('disabled');
+  else $('#startBtn').addClass('disabled');
+}
+
+
+/* NAME GAME */
+$(document).on('click', '#nameGameBtn', function (){
+  // check if name was set
+  if($('input[type="text"][name="gamename"]').val().length>0){
+    scrollTo(2);
+  }
+  else{
+    // request name from gamemaster
+    popup('Bitte gib zuerst einen Namen für das Spiel ein.');
+  }
+});
+
+
+/* SELECT START SCENE */
+$(document).on('click', '#sceneSelection ul li', function (){
+  // check radio button
+  $(this).children('input[type=radio]').eq(0).prop('checked', true);
+});
+
+function showDbContent (){
+  console.log('show db content');
+  $('#userScenes').addClass('hide');
+  $('#scenes').removeClass('hide');
+  $('#dbContentBtn').removeClass('hide');
+  $('#uContentBtn').addClass('hide');
+}
+
+function showUContent (){
+  console.log('show u content');
+  $('#scenes').addClass('hide');
+  $('#userScenes').removeClass('hide');
+  $('#dbContentBtn').addClass('hide');
+  $('#uContentBtn').removeClass('hide');
+}
+
+$(document).on('click', '#chooseSceneBtn', function (){
+  // check if start scene is selected
+  if($('input[type="radio"][name="startScene"]:checked').size()>0){
+    scrollTo(3);
+  }
+  else{
+    // request start scene from gamemaster
+    popup('Bitte wähle eine Szene um das Abenteuer mit dieser beginnen zu können.');
+  }
+});
+
+
+/* START THE ADVENTURE */
+function startAdventure (){
+  // check if button is enabled
+  if(!$(this).hasClass('disabled')){
+    // check if start scene was selected
+    if($('input[type="radio"][name="startScene"]:checked').size()>0 && $('input[type="text"][name="gamename"]').val().length>0){
+      // save game in database
+      $.post('/saveGame', { roomID:roomID, gamename:$('input[name=gamename]').val() }, function (response){
+        if(!response.err){
+          // start adventure with start scene and current game id
+          socket.emit('startAdventure', { roomID:roomID, startScene:$('input[type="radio"][name="startScene"]:checked').val() });
+        }
+        else{
+          popup('Hoppla, da lief was schief!', 'Es konnte kein Spielstand gespeichert werden. Bitte versuche es erneut.');
+        }
+      }).fail(function (){
+        popup('Hoppla, da lief was schief!', 'Es konnte kein Spielstand gespeichert werden. Bitte versuche es erneut.');
+      });
+    }
+    else{
+      popup('Wähle zuerst eine Start-Szene und gib dem Abenteuer einen Namen.');
+    }
+  }
+}
+
+socket.on('startAdventure', function (data){
+  if(data.roomID === roomID) window.location.href = "http://141.59.164.11:3000/play/"+data.roomID+"/"+data.startScene;
+});
+
+socket.on('adventureClosed', function (){
+  popup('Das Spiel wurde beendet.');
+  setTimeout(function(){ window.location.href = "http://141.59.164.11:3000/close/"+roomID }, 2000);
+});
+
+
+/* SCROLL TO */
+function scrollTo (step){
+	var pos = $('.step').width()*(step-1);
+  $('#wrapper').animate({scrollLeft: pos}, 800);
+  <% if(tutorial){ %>if(step==2){
+    var content = '<p>Möchtest du die Tutorial-Kampagne starten, so dass für dich automatisch alle weiteren Vorbereitungen getroffen werden?</p>';
+    popupWithContent('Du bist neu hier!', content, [{f:'startTutorial()', title:'Ja'}, {f:'closePopup()', title:'Nein'}]);
+  }<% } %>
+}
+
+/* TUTORIAL */
+function startTutorial(){
+  $('#scenes ul li input[value="1"]').prop('checked', true);
+  scrollTo(3);
+  var description = 'In der Tutorial-Kampagne haben die Spielercharaktere mit Wasserknappheit zu kämpfen, auch wenn es zunächst für sie nicht so erscheint. Sobald es aufhört zu regnen, trocknet die Welt innerhalb von Stunden aus und wird zur staubigen Wüste. Ob dahinter der verschwundene Meteorologe steckt? ...';
+  $('#popupInner').html('<h3>Spoiler!</h3><p>'+description+'</p><a onClick="closePopup();">OK</a>');
+}
+
+</script>
+
+</body>
+</html>

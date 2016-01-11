@@ -1,0 +1,20 @@
+<div id="settings">
+  <div class="top">
+  </div>
+  <!-- dotted line -->
+  <svg width="100%" height="6px" class="dottedLine">
+    <line x1="0" x2="2000" y1="2" y2="2" stroke="#4a5a64" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+  </svg>
+  <div class="bottom">
+    <h3>Aktueller Spielcode: <span class="code"><%= roomID %></span></h3>
+
+    <div id="tutorial">
+      <input type="checkbox" name="tutorial"<% if(tutorial.tutorialMode=='1'){ %> checked<% } %>/><span id="toggleTutorial"></span>
+      <h3>Tutorial-Modus</h3>
+    </div>
+
+    <a id="close">Spiel beenden</a>
+
+    <p id="userDetails">Angemeldet als <%= username %></p>
+  </div>
+</div>

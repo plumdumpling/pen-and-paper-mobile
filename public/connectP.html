@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>Pen &amp; Paper | v1.0.0</title>
+
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link rel="stylesheet" type="text/css" href="css/connect.css">
+</head>
+
+<body class="preload">
+
+<a href="/"><img id="backBtn" src="/images/back.png"/></a>
+
+<!-- HEADER -->
+<header class="player">
+  <h1>Spiel beitreten</h1>
+
+  <p>Verbinde dich mit deiner Spielgruppe und erlebe in der Rolle deines Charakters ein unvergessliches Abenteuer.</p>
+
+  <!-- dotted line -->
+  <svg width="100%" height="6px" class="dottedLine">
+    <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+  </svg>
+</header>
+
+
+<div id="wrapper">
+  <div id="stepOuter" data-stepsCount="1">
+    <div class="step">
+      <div id="joinDIV">
+      	<h3>Zum verbinden Code eingeben</h3>
+        <p>Den Verbindungscode erhältst du von deinem Spielleiter.</p>
+        <br/>
+        <input type="text" id="roomID" required /><br/>
+      	<a class="playerButton" onClick="join();">Spiel beitreten</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer><img src="/images/gradient.png"/></footer>
+
+
+<!-- JavaScript - libraries and modules  -->
+<script src="js/jquery-1.11.2.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- JavaScript - custom scripts  -->
+<script type="text/javascript" src="js/basic.js"></script>
+<script type="text/javascript">
+var socket = io.connect('http://141.59.164.11:3000');
+var roomID<% if(roomID){ %> = '<%= roomID %>'<% } %>;
+
+
+/* JOIN THE GAME */
+
+function join (){
+  window.location.href = "/join/"+$('#roomID').val();
+}
+
+<% if(roomID){ %>socket.emit('joinGame', {username:'<%= username %>', roomID:roomID, sessionID:'<%= sessionID %>', id:'<%= userID %>'});<% } %>
+
+
+/* CHECK STATUS OF CONNECTED GAME */
+
+socket.on('connected', function (response){
+  if(response.err){
+    popup(response.err);
+  }
+  else{
+    switch (response.adventureStatus) {
+      case 0:
+        // wait for other players to connect
+        var joinDIV = document.getElementById('joinDIV');
+      	joinDIV.innerHTML = '<p>Du bist dem Spiel <span id="code">'+roomID+'</span> beigetreten.<br/><br/>Warte auf weitere Spieler.</p>';
+        break;
+      case 1:
+        // preparation of characters is runing
+        window.location.href = "/prepare/"+roomID;
+        break;
+      case 2:
+        // adventure started already
+        window.location.href = "/play/"+roomID;
+        break;
+    }
+  }
+});
+
+
+/* START GAME INTRODUCTION */
+
+socket.on('startIntro', function (data){
+	if(data.roomID === roomID) window.location.href = "/prepare/"+roomID;
+});
+
+socket.on('startAdventure', function (data){
+	if(data.roomID === roomID) window.location.href = "/play/"+roomID;
+});
+
+socket.on('adventureClosed', function (){
+  popup('Das Spiel wurde beendet.');
+  setTimeout(function(){ window.location.href = "/close/"+roomID }, 2000);
+});
+
+
+</script>
+
+</body>
+</html>

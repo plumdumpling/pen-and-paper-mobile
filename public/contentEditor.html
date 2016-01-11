@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>Pen &amp; Paper | v1.0.0</title>
+
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link rel="stylesheet" type="text/css" href="css/contentEditor.css">
+  <link rel="stylesheet" type="text/css" href="css/characterSheet.css">
+  <link rel="stylesheet" type="text/css" href="css/drawTool.css">
+
+<style type="text/css">
+#steps{
+  width: <% if(contentType==='characters'){ %>270<% }else if(contentType==='scenes'){ %>210<% }else{ %>160<% } %>px;
+}
+
+.line.left{
+  margin-right: <% if(contentType==='characters'){ %>135<% }else if(contentType==='scenes'){ %>105<% }else{ %>80<% } %>px;
+}
+
+.line.right{
+  margin-left: <% if(contentType==='characters'){ %>135<% }else if(contentType==='scenes'){ %>105<% }else{ %>80<% } %>px;
+}
+</style>
+<style type="text/css">body{}</style>
+
+</head>
+<body class="preload">
+
+<a href="<% if(ingame){ %>/play/<%= ingame %><% }else{ %>/<% }%>"><img id="backBtn" src="/images/back.png"/></a>
+
+<!-- HEADER -->
+<header>
+  <h1><% if(contentType==='characters'){ %>Charakter<% } %><% if(contentType==='scenes'){ %>Szene<% } %><% if(contentType==='enemies'){ %>Gegner<% } %><% if(contentType==='items'){ %>Gegenstand<% } %><% if(newContent){ %> erstellen<% }else{ %> bearbeiten<% } %></h1>
+  <p id="progressDescription"></p>
+
+  <% if(contentType==='characters'){ %><p id="characterpoints">Du hast noch <span id="cpCounter">0</span> Charakterpunkte</p><% } %>
+
+  <div id="progress">
+
+    <div class="line left">
+      <!-- dotted line -->
+      <svg width="100%" height="6px" class="dottedLine">
+        <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+      </svg>
+    </div>
+
+    <div class="line right">
+      <!-- dotted line -->
+      <svg width="100%" height="6px" class="dottedLine">
+        <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+      </svg>
+    </div>
+
+    <div id="steps">
+      <% if(contentType==='characters'){ for(var i=0; i<5; i++){ %>
+      <div class="progressStep<% if(i==0){ %> current<% } %>" data-step="<%= (i+1) %>"><img src="/images/content/<%= contentType %>/step<%= (i+1) %>.png" alt="step <%= (i+1) %>"/></div>
+      <% } }else if(contentType==='scenes'){ for(var i=0; i<4; i++){ %>
+      <div class="progressStep<% if(i==0){ %> current<% } %>" data-step="<%= (i+1) %>"><img src="/images/content/<%= contentType %>/step<%= (i+1) %>.png" alt="step <%= (i+1) %>"/></div>
+      <% } }else{ for(var i=0; i<3; i++){ %>
+      <div class="progressStep<% if(i==0){ %> current<% } %>" data-step="<%= (i+1) %>"><img src="/images/content/<%= contentType %>/step<%= (i+1) %>.png" alt="step <%= (i+1) %>"/></div>
+      <% } } %>
+    </div>
+
+    <br class="clear"/>
+  </div>
+</header>
+
+<div id="content">
+  <div id="inner">
+    <div id="stepOuter" data-stepsCount="<% if(contentType==='characters'){ %>5<% }else if(contentType==='scenes'){ %>4<% }else{ %>3<% } %>">
+    <% if(contentType!=='characters'){ %><form id="<%= contentType %>Form"><% } %>
+    <% if(contentType==='characters'){ %><% include manageContent/characterForm %><% } %>
+    <% if(contentType==='scenes'){ %><% include manageContent/sceneForm %><% } %>
+    <% if(contentType==='enemies'){ %><% include manageContent/enemieForm %><% } %>
+    <% if(contentType==='items'){ %><% include manageContent/itemForm %><% } %>
+    <% if(contentType!=='characters'){ %></form><% } %>
+    </div>
+  </div>
+</div>
+
+<div id="footer">
+  <!-- dotted line -->
+  <svg width="100%" height="6px" class="dottedLine">
+    <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+  </svg>
+
+  <a id="next">Weiter</a><a id="save" class="hide">Speichern</a>
+</div>
+
+
+<div id="maximizedCanvas" class="hide"></div>
+
+
+<!-- pop ups -->
+<div id="popup" class="popup hide">
+  <div id="popupInner"></div>
+</div>
+
+<% if(contentType==='characters' && !startLevel){ %>
+<div class="popup">
+  <div id="selectStartlevel">
+    <h3>Wähle auf welchem Level dein Charakter starten soll.</h3>
+    <a data-value="0">Taugenichts</a>
+    <a data-value="1">Otto Normal</a>
+    <a data-value="2">Könner</a>
+    <a data-value="3">Toller Hecht</a>
+    <a data-value="4">Superheld</a>
+  </div>
+</div>
+<% } %>
+
+<div id="shadowBox"<% if(contentType==='characters' && !startLevel){ %> class="visible"<% } %>></div>
+
+<% if(contentType==='scenes'){ %>
+<div id="keywordsInfo" class="hide">
+  <div id="closeKeyword"></div>
+  <div id="styleBtns" style="opacity: 0;">
+		<button data-style="bold"><b>fett</b></button>
+		<button data-style="italic"><i>kursiv</i></button>
+	</div>
+  <div id="keywordsScenes"></div>
+</div>
+<% } %>
+
+<!-- saving message -->
+<div id="saving" class="hide">
+  <h2 id="savingMessage"><% if(contentType==='characters'){ %>Charakter<% } %><% if(contentType==='scenes'){ %>Szene<% } %><% if(contentType==='enemies'){ %>Gegner<% } %><% if(contentType==='items'){ %>Gegenstand<% } %> wird gespeichert</h2>
+</div>
+
+<!-- sidebars -->
+<div id="sidebar">
+  <nav id="buttons">
+    <button></button>
+    <button></button>
+    <button id="drawToolBtn" data-content="drawTool"<% if(contentType==='characters' || contentType==='scenes'){ %> class="hidden"<% } %>></button>
+      <svg width="20px" height="6px" class="dottedLine"><line x1="0" x2="20" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/></svg>
+  </nav>
+
+  <div id="sidebarContent">
+    <% include sidebars/drawTool %>
+  </div>
+</div>
+
+
+<!-- JavaScript - libraries and modules  -->
+<script src="js/jquery-1.11.2.min.js"></script>
+
+<!-- JavaScript - custom scripts  -->
+<script type="text/javascript" src="js/basic.js"></script>
+<script type="text/javascript" src="js/drawTool.js"></script>
+<script type="text/javascript">
+
+var imagepath<% if(response){ %> = "<% if(contentType==='characters'){ %><% if(response.informations.imagepath && response.informations.imagepath!='null'){ %><%= response.informations.imagepath %><% }}else{if(response.imagepath && response.imagepath!='null'){ %><%= response.imagepath %><% }} %>"<% } %>;
+
+<% if(response){ %>/* DISPLAY IMAGE */
+// check if image is user created or default
+if(imagepath.indexOf('uploads') > -1){
+  var canvas = document.getElementById("canvas");
+  var ctx = canvas.getContext("2d");
+  var loadedImage = new Image();
+  loadedImage.src = imagepath;
+  loadedImage.onload = function (){
+  	ctx.drawImage(loadedImage, 0, 0, loadedImage.width, loadedImage.height, 0, 0, actualWidth, actualHeight);
+  }
+}<% } %>
+
+
+<% if(contentType==='characters'){ if(startLevel){ %>
+// initialize startlevel with characterpoints (CP)
+var startLevel = <%= startLevel %>;
+var cp = <%= response.informations.cp %>;
+$('#iForm input[name=cp]').val(cp);
+// show characterpoints (CP)
+document.getElementById('cpCounter').innerHTML = cp;
+<% } else { %>
+var cp, startLevel;
+$(document).on('click', '#selectStartlevel a', function (event){
+  // get startLevel and characterpoints (CP)
+  startLevel = parseInt($(event.target).attr('data-value'));
+  switch (startLevel) {
+  	case 0:
+  		cp = 20;
+  		break;
+  	case 1:
+  		cp = 40;
+  		break;
+  	case 2:
+  		cp = 60;
+  		break;
+  	case 3:
+  		cp = 80;
+  		break;
+  	case 4:
+  		cp = 100;
+  		break;
+  }
+  $('#iForm input[name=startLevel]').val(startLevel);
+  $('#iForm input[name=cp]').val(cp);
+  // show characterpoints (CP)
+  document.getElementById('cpCounter').innerHTML = cp;
+  // remove popup
+  $('#selectStartlevel').remove();
+  $('#shadowBox').removeClass('visible');
+});
+<% }} %>
+
+var createInGame = false;
+<% include js/stepChange.js %>
+
+/* INITIALIZE */
+$(document).ready(function (){
+  // initialize first step
+  $('.step').each(function (){
+    if($(this).attr('data-step') == 1) $(this).addClass('current');
+  });
+  updateProgress();
+
+<% if(contentType==='characters'){ %>
+  // add attribute images to skills
+  var attributes = [];
+  $('.skillInner').each(function (){
+    attributes = $(this).attr('data-attributes').split('-');
+    $(this).find('.images').eq(0).html('<img src="/images/charactersheet/'+attributes[0]+'_s.png"/><img src="/images/charactersheet/'+attributes[1]+'_s.png"/>');
+  });
+<% } %>
+
+
+<% if(contentType==='scenes' && response){ %>
+  <% if(response.description){ %>
+  // decode description data
+  var div = document.createElement('div');
+  var decodedContent;
+  // decode description html from database
+  div.innerHTML = '<%= response.description %>';
+  decodedContent = div.firstChild.nodeValue;
+  // insert decoded html in div
+  document.getElementById('sceneDescription').innerHTML = decodedContent;
+  $('#sceneDescription p').attr('contenteditable', true);
+  <% } %>
+  <% if(response.keywordsInfo){ %>
+  // decode keywords info html from database
+  div.innerHTML = '<%= response.keywordsInfo %>';
+  decodedContent = div.firstChild.nodeValue;
+  // insert decoded html in div
+  // document.getElementById('keywordsScenes').innerHTML = decodedContent;
+  $('#keywordsScenes').html(decodedContent);
+  console.log(decodedContent);
+  console.log(document.getElementById('keywordsScenes').innerHTML);
+  $('#keywordsScenes div h3').attr('contenteditable', true);
+  $('#keywordsScenes div p').attr('contenteditable', true);
+  <% } %>
+<% } %>
+});
+
+
+/* SAVE CONTENT */
+$(document).on('click', '#save', function (){
+  // check if everything is filled out
+  if(formComplete()){
+    // show saving message
+    $('#saving').removeClass('hide');
+
+    // check if canvas is empty
+    if(document.getElementById('canvas').toDataURL() == document.getElementById('blankCanvas').toDataURL()){
+      // save data without image
+      console.log('canvas is empty - save without image');
+      // collect <%= contentType %> data from form
+      <% if(contentType==='characters'){ %>var data = collectCharacterData('/images/content/<%= contentType %>/default.png');<% } %>
+      <% if(contentType==='scenes'){ %>var data = collectSceneData('/images/content/<%= contentType %>/category'+$('select[name=category]').val()+'.png');<% } %>
+      <% if(contentType==='enemies'){ %>var data = collectEnemieData('/images/content/<%= contentType %>/category'+$('select[name=category]').val()+'.png');<% } %>
+      <% if(contentType==='items'){ %>var data = collectItemData('/images/content/<%= contentType %>/category'+$('select[name=category]').val()+'.png');<% } %>
+
+      // save content in database
+      saveContent(data);
+    }
+    else{
+      // save image
+      $.post('/draw/saveImage', {imageData:canvas.toDataURL(), imagepath:imagepath}, function (response){
+        if(response.err) {
+          popup('Hoppla, da lief was schief!', 'Dein Bild wurde geklaut. Bitte versuche erneut zu speichern.');
+        }
+        else{
+          // collect <%= contentType %> data from form
+          <% if(contentType==='characters'){ %>var data = collectCharacterData(response.imagepath);<% } %>
+          <% if(contentType==='scenes'){ %>var data = collectSceneData(response.imagepath);<% } %>
+          <% if(contentType==='enemies'){ %>var data = collectEnemieData(response.imagepath);<% } %>
+          <% if(contentType==='items'){ %>var data = collectItemData(response.imagepath);<% } %>
+
+          // save content in database
+          saveContent(data);
+        }
+      }).fail(function (){
+        popup('Hoppla, da lief was schief!', 'Dein Bild wurde geklaut. Bitte versuche erneut zu speichern.');
+      });
+    }
+  }
+});
+
+function saveContent (data){
+  // send <%= contentType %> data to server
+  <% if(newContent){ %>
+  $.ajax({
+    url: '/save/<%= contentType %>',
+    type: 'POST',
+    data: {data:data}
+  })
+  .done(function(response) {
+    if(!response.err){
+      $('#savingMessage').text('Speichern erfolgreich');
+      setTimeout(function(){ window.location.href = "/manage/<%= contentType %>"; }, 1000);
+    }
+    else{
+      popup('Hoppla, da lief was schief!', 'Leider konnten deine Daten nicht gespeichert werden. Bitte versuche erneut zu speichern.');
+    }
+  })
+  .fail(function() {
+    popup('Hoppla, da lief was schief!', 'Leider konnten deine Daten nicht gespeichert werden. Bitte versuche erneut zu speichern.');
+  });
+  <% }else{ %>
+  $.ajax({
+    url: '/save/<%= contentType %>',
+    type: 'PUT',
+    data: {data:data, contentID:<%= contentID %>}
+  })
+  .done(function(response) {
+    if(!response.err){
+      $('#savingMessage').text('Speichern erfolgreich');
+      setTimeout(function(){ window.location.href = "<% if(ingame){ %>/play/<%= ingame %><% }else{ %>/manage/<%= contentType %><% }%>"; }, 1000);
+    }
+    else{
+      popup('Hoppla, da lief was schief!', 'Leider konnten deine Daten nicht gespeichert werden. Bitte versuche erneut zu speichern.');
+    }
+  })
+  .fail(function() {
+    popup('Hoppla, da lief was schief!', 'Leider konnten deine Daten nicht gespeichert werden. Bitte versuche erneut zu speichern.');
+  });
+  <% } %>
+}
+
+<% include js/collectForDb.js %>
+
+<% if(!newContent && contentType==='characters'){ %><% include manageContent/fillCharacterSheet %><% } %>
+
+
+/* FORM VALIDATION */
+function formComplete (){
+  var saveIt = true;
+  <% if(contentType==='characters'){ %>
+  $('#iForm input[type=text], #iForm textarea').each(function (){
+    if($(this).val().length <= 0){
+      scrollTo(4);
+      popup('Bitte fülle zuerst alle Felder aus.');
+      saveIt = false;
+      return;
+    }
+  });
+  if(saveIt){
+    $('#iForm input[type=number]').each(function (){
+      if(!$.isNumeric($(this).val())){
+        scrollTo(4);
+        popup('Bitte gib ein gültiges Alter für deinen Charakter ein.');
+        saveIt = false;
+        return;
+      }
+    });
+  }
+  <% }else{ %>
+  $('#<%= contentType %>Form input[type=text], #iForm textarea').each(function (){
+    if($(this).val().length <= 0){
+      scrollTo(<% if(contentType==='scenes'){ %>1<% }else{ %>2<% } %>);
+      popup('Bitte fülle zuerst alle Felder aus.');
+      saveIt = false;
+      return;
+    }
+  });
+  if(saveIt){
+    if($('#<%= contentType %>Form select[name=category]').val() <= 0){
+      scrollTo(<% if(contentType==='scenes'){ %>4<% }else{ %>3<% } %>);
+      popup('Wähle eine Kategorie.');
+      saveIt = false;
+      return;
+    }
+  }
+  <% } %>
+
+  return saveIt;
+}
+
+/* CANVAS MAXIMIZE */
+$('#maxCanvas').on('click', function (){
+  if($(this).parent().parent().attr('id') == 'canvasOuter'){
+    // maximize canvas
+    $(this).parent().appendTo('#maximizedCanvas');
+    $('#maximizedCanvas').removeClass('hide');
+    resizeCanvas();
+  }
+  else{
+    // minimize canvas
+    $(this).parent().appendTo('#canvasOuter');
+    $('#maximizedCanvas').addClass('hide');
+    resizeCanvas();
+  }
+});
+
+/* SIDEBAR */
+$(document).on('click', '#sidebar #buttons button', function (event){
+  if(!$('#sidebar').hasClass('open')){
+    // mark button as clicked
+    $(event.target).addClass('active');
+  }
+
+  // show or hide sidebar
+  toggleSidebar($(event.target).attr('data-content'));
+});
+
+
+/* UNDO ON KEYDOWN Z-KEY */
+var shiftDown = false;
+
+$(document).keydown(function (event){
+	if(event.keyCode===16) shiftDown = true;
+	else if(event.keyCode===90){
+		if(shiftDown) redo();
+		else undo();
+	}
+});
+
+$(document).keyup(function (event){
+	if(event.keyCode===16) shiftDown = false;
+});
+</script>
+<% if(contentType==='characters'){ %><script src="js/characterCreation.js"></script><% } %>
+<% if(contentType==='scenes'){ %><script src="js/sceneCreation.js"></script><% } %>
+
+
+</body>
+</html>

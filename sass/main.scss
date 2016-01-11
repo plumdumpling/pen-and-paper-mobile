@@ -1,0 +1,178 @@
+// out: ../public/css/mainMenue.css
+
+@import "colors";
+@import "fonts";
+@import "animations";
+@import "buttons";
+@import "crossbrowser";
+
+
+/* MAIN PAGE */
+
+body, html{
+  background-color: $slateBlue;
+  display: table;
+}
+
+#topNav{
+  width: 100%;
+  height: 44px;
+  position: fixed;
+  z-index: 30;
+  top: 0;
+  background-color: #fff;
+
+  p{
+    left: 0;
+    margin: 10px;
+  }
+
+  a{
+    position: absolute;
+    top: 0;
+    margin: 10px;
+    font-weight: $bold;
+    letter-spacing: 1px;
+
+    img{
+      height: 24px;
+      vertical-align: top;
+    }
+
+    &#logout{
+      right: 0;
+    }
+  }
+}
+
+#adventure{
+  position: fixed;
+  z-index: 10;
+  width: 100%;
+  top: 44px;
+  padding: 30px 0;
+  background-color: $lightBlue;
+  text-align: center;
+  @include property('box-shadow', '0 1px 7px #4a5a64');
+
+  a{
+    margin: 10px auto;
+    @include ghostButton();
+  }
+
+  svg.dottedLine{
+    position: absolute;
+    left: 0;
+
+    &:first-of-type{
+      margin-top: -24px;
+    }
+    &:last-of-type{
+      margin-top: 20px;
+    }
+  }
+}
+
+#info{
+  position: relative;
+  height: 100px;
+  margin: 0;
+  padding: 5px 5%;
+  background-color: #fff;
+  @include transition('margin-top 0.5s linear');
+
+  h3 .break{ display: none; }
+  @media screen and (max-width: 650px) {
+    h3{
+      margin-top: 4px;
+      @include transition('margin-top 0.5s linear');
+      .break{ display: block; }
+    }
+  }
+
+  & + div{
+    @include transition('margin-bottom 0.5s linear');
+  }
+
+  &.up{
+    margin-top: -110px;
+
+    h3{
+      margin-top: 90px;
+    }
+
+    & + div{
+      margin-bottom: -110px;
+    }
+  }
+}
+
+#content{
+  position: relative;
+  height: 100%;
+  padding-top: 240px;
+
+  #wrapper{
+    position: relative;
+    height: 100%;
+
+    #inner{
+      position: absolute;
+      top: 110px;
+      bottom: 0;
+      z-index: 5;
+      width: 90%;
+      overflow-y: auto;
+      background-color: $slateBlue;
+
+      &.userContents{
+        padding: 40px 5% 0;
+        @include property('box-shadow', '0 -1px 7px #4a5a64');
+      }
+
+      .contents{
+        margin-bottom: 40px;
+        width: 45%;
+        min-width: 304px;
+        display: inline-block;
+
+        h2{
+          max-width: 304px;
+          margin: 0;
+          color: #fff;
+          display: inline-block;
+        }
+
+        .uci{
+          width: 48px;
+          height: 48px;
+          margin: 10px 16px 0 0;
+          display: inline-block;
+          overflow: hidden;
+          vertical-align: top;
+          background-color: $babyBlue;
+
+          img{
+            height: 48px;
+          }
+
+          &.new{
+            margin: 10px 0 0 0;
+            background-image: url("images/addContent.png");
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: contain;
+            cursor: pointer;
+
+            &.characters{ background-color: $appleGreen; }
+            &.items{ background-color: $purple; }
+            &.enemies{ background-color: $red; }
+            &.scenes{ background-color: $salmon; }
+          }
+        }
+
+        &#scenes .uci img{ margin-left: -24px; }
+      }
+    }
+  }
+}

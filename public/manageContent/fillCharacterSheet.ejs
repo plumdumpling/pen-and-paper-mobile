@@ -1,0 +1,93 @@
+var inputCount;
+
+/* ATTRIBUTES */
+var attributeValues = <%- JSON.stringify(response.attributeValues) %>;
+
+<% for (var i=0; i<attributes.name.length; i++){ %>
+// insert value for attribute <%= attributes.name[i] %> of selected character
+inputCount = 0;
+$('input[type=checkbox][name=<%= attributes.name[i] %>]').each(function (){
+  // check and enable as many checkboxes as the value of the attribute says
+  if(inputCount<attributeValues.<%= attributes.name[i] %>){
+    $(this).prop('checked', true);
+    $(this).removeClass('disabled');
+    <% if(i===1){ %>if(inputCount>=3 && $('input[type=checkbox][name=<%= attributes.name[0] %>]:checked').length<3) removeAttrSlot('g1', 'a1');<% } %>
+    <% if(i===3){ %>if(inputCount>=3 && $('input[type=checkbox][name=<%= attributes.name[2] %>]:checked').length<3) removeAttrSlot('g2', 'a1');<% } %>
+    <% if(i===5){ %>if(inputCount>=3 && $('input[type=checkbox][name=<%= attributes.name[4] %>]:checked').length<3) removeAttrSlot('g3', 'a1');<% } %>
+    inputCount++;
+  }
+  else {
+    <% if(i===1){ %>if(attributeValues.<%= attributes.name[i] %><3 && $('input[type=checkbox][name=<%= attributes.name[0] %>]:checked').length>3){
+      for (var i=0; i<($('input[type=checkbox][name=<%= attributes.name[0] %>]:checked').length-3); i++){
+        removeAttrSlot('g1', 'a2');
+      }
+    }<% } %>
+    <% if(i===3){ %>if(attributeValues.<%= attributes.name[i] %><3 && $('input[type=checkbox][name=<%= attributes.name[2] %>]:checked').length>3){
+      for (var i=0; i<($('input[type=checkbox][name=<%= attributes.name[2] %>]:checked').length-3); i++){
+        removeAttrSlot('g2', 'a2');
+      }
+    }<% } %>
+    <% if(i===5){ %>if(attributeValues.<%= attributes.name[i] %><3 && $('input[type=checkbox][name=<%= attributes.name[4] %>]:checked').length>3){
+      for (var i=0; i<($('input[type=checkbox][name=<%= attributes.name[4] %>]:checked').length-3); i++){
+        removeAttrSlot('g3', 'a2');
+      }
+    }<% } %>
+    return false;
+  }
+});
+<% } %>
+
+function removeAttrSlot (group, classname){
+  // checkboxes of the opposite attribute
+  $('.'+group+' .'+classname+' input[type=checkbox]').each(function (){
+    // disable the last enabled checkbox, if it's not checked
+    if(!$(this).prop('checked') && $(this).nextAll('input[type=checkbox]').eq(0).hasClass('disabled')){
+      $(this).addClass('disabled');
+      return false;
+    }
+  });
+}
+
+
+
+/* SKILLS */
+var skillValues = <%- JSON.stringify(response.skillValues) %>;
+
+<% for (var i=0; i<skills.name.length; i++){ %>
+// insert value for skill <%= skills.name[i] %> of selected character
+inputCount = 0;
+$('input[type=checkbox][name=<%= skills.name[i] %>]').each(function (){
+  // check if skill is set
+  if(skillValues.<%= skills.name[i] %> > 0) $(this).parent().addClass('checked');
+  // check as many checkboxes as the value of the skill says
+  if(inputCount<skillValues.<%= skills.name[i] %>){
+    $(this).prop('checked', true);
+    inputCount++;
+  }
+  else return false;
+});
+<% } %>
+
+
+/* CHARACTERISTICS */
+// advantages
+var advanValues = <%- JSON.stringify(response.advanValues) %>;
+
+<% for (var i=0; i<characteristics.advantages.name.length; i++){ %>
+// check checkbox for advantage <%= characteristics.advantages.name[i] %> of selected character
+if(advanValues.<%= characteristics.advantages.name[i] %>){
+  $('input[type=checkbox][name=<%= characteristics.advantages.name[i] %>]').prop('checked', true);
+  $('input[type=checkbox][name=<%= characteristics.advantages.name[i] %>]').parent().addClass('checked');
+}
+<% } %>
+
+// disadvantages
+var disadvanValues = <%- JSON.stringify(response.disadvanValues) %>;
+
+<% for (var i=0; i<characteristics.disadvantages.name.length; i++){ %>
+// check checkbox for disadvantage <%= characteristics.disadvantages.name[i] %> of selected character
+if(disadvanValues.<%= characteristics.disadvantages.name[i] %>){
+  $('input[type=checkbox][name=<%= characteristics.disadvantages.name[i] %>]').prop('checked', true);
+  $('input[type=checkbox][name=<%= characteristics.disadvantages.name[i] %>]').parent().addClass('checked');
+}
+<% } %>

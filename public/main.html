@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>Pen &amp; Paper | v1.0.0</title>
+
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link rel="stylesheet" type="text/css" href="css/mainMenue.css">
+
+
+  <!-- <link rel="stylesheet" type="text/css" href="css/basicStyles.css">
+  <link rel="stylesheet" type="text/css" href="css/portrait.css" media="screen and (orientation: portrait), screen and (max-width: 480px)">
+  <link rel="stylesheet" type="text/css" href="css/landscape.css" media="screen and (orientation: landscape) and (min-width: 481px)"> -->
+</head>
+<body class="preload">
+
+<nav id="topNav">
+  <p>Hallo, <%= username %>!</p>
+
+  <a id="logout" onClick="logout();">Abmelden</a>
+</nav>
+
+<!-- START A PEN-AND-PAPER-ADVENTURE -->
+<div id="adventure">
+  <!-- dotted line -->
+  <svg width="100%" height="6px" class="dottedLine">
+    <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+  </svg>
+
+  <center><a onClick="hostGame();">Spiel leiten</a></center>
+  <center><a onClick="joinGame();">Spiel beitreten</a></center>
+
+  <!-- dotted line -->
+  <svg width="100%" height="6px" class="dottedLine">
+    <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+  </svg>
+</div>
+
+<div id="content">
+  <div id="wrapper">
+    <!-- INFO -->
+    <div id="info"><h3>Erstelle Inhalte für dein ganz <br class="break">persönliches Pen-&-Paper-Abenteuer</h3></div>
+
+    <div id="inner" class="userContents">
+      <!-- MANAGE USER CONTENTS -->
+      <!-- USER CHARACTERS -->
+      <div id="characters" class="contents">
+        <a href="/manage/characters"><h2>Charaktere (<%= characters.length %>)</h2></a><br>
+        <% for(var i=0; i<5; i++){ %><div class="uci<% if(characters.length<=i || i===4){ %> new characters<% } %>">
+          <% if(characters.length>i && i<4){ %><img src="<%= characters[i].imagepath %>" /><% } %>
+        </div><% if(characters.length<=i || i===4){ break; } %><% } %>
+      </div>
+
+      <!-- USER ITEMS -->
+      <div id="items" class="contents">
+        <a href="/manage/items"><h2>Gegenstände (<%= items.length %>)</h2></a><br>
+        <% for(var i=0; i<5; i++){ %><div class="uci<% if(items.length<=i || i===4){ %> new items<% } %>">
+          <% if(items.length>i && i<4){ %><img src="<%= items[i].imagepath %>" /><% } %>
+        </div><% if(items.length<=i || i===4){ break; } %><% } %>
+      </div>
+
+      <!-- USER ENEMIES -->
+      <div id="enemies" class="contents">
+        <a href="/manage/enemies"><h2>Gegner (<%= enemies.length %>)</h2></a><br>
+        <% for(var i=0; i<5; i++){ %><div class="uci<% if(enemies.length<=i || i===4){ %> new enemies<% } %>">
+          <% if(enemies.length>i && i<4){ %><img src="<%= enemies[i].imagepath %>" /><% } %>
+        </div><% if(enemies.length<=i || i===4){ break; } %><% } %>
+      </div>
+
+      <!-- USER SCENES -->
+      <div id="scenes" class="contents">
+        <a href="/manage/scenes"><h2>Szenen (<%= scenes.length %>)</h2></a><br>
+        <% for(var i=0; i<5; i++){ %><div class="uci<% if(scenes.length<=i || i===4){ %> new scenes<% } %>">
+          <% if(scenes.length>i && i<4){ %><img src="<%= scenes[i].imagepath %>" /><% } %>
+        </div><% if(scenes.length<=i || i===4){ break; } %><% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if(roomID){ %>
+<div id="shadowBox" class="visible"></div>
+
+<div class="popup">
+  <div id="returnToGame">
+    <h3>Laufendes Abenteuer</h3>
+    <!-- dotted line -->
+    <svg width="100%" height="6px" class="dottedLine">
+      <line x1="0" x2="2000" y1="2" y2="2" stroke="#33373f" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+    </svg>
+    <p>Ein Spiel das du leitest wurde nicht beendet. Möchtest du ins Spiel zurückkehren, oder es beenden?</p>
+    <a onClick="returnToGame();">Zurückkehren</a>
+    <a onClick="closeGame();">Beenden</a>
+  </div>
+</div>
+<% } %>
+
+
+<!-- JavaScript - libraries and modules  -->
+<script src="js/jquery-1.11.2.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- JavaScript - custom scripts  -->
+<script type="text/javascript" src="js/basic.js"></script>
+<script type="text/javascript">
+function logout (){
+  window.location.href = '/logout';
+}
+
+function hostGame (){
+  window.location.href = '/host';
+}
+
+function joinGame (){
+  window.location.href = '/join';
+}
+
+$(document).on('click', '.uci', function (event){
+  var contentType;
+  if($(event.target).get(0).tagName == 'DIV'){
+    contentType = $(event.target).parent().attr('id');
+  }
+  else{
+    contentType = $(event.target).parent().parent().attr('id');
+  }
+
+  if($(event.target).hasClass('new')){
+    // create new content
+    window.location.href = '/create/'+contentType;
+  }
+  else{
+    // manage content
+    window.location.href = '/manage/'+contentType;
+  }
+});
+
+/* HANDLE SCROLLING */
+var prevScroll = 0;
+$('#inner').bind('scroll', function() {
+  var currentScroll = $(this).scrollTop();
+   if(currentScroll>prevScroll && !$('#inner').hasClass('scrolledUp')){
+     // scrolls down
+     // hide info div
+     $('#info').addClass('up');
+     // scale inner div
+     $('#inner').addClass('scrolledUp');
+     setTimeout(function (){
+       $('#inner').removeClass('scrolledUp');
+     }, 1000);
+   }
+   else if(currentScroll<prevScroll && !$('#inner').hasClass('scrolledUp')){
+     // scrolls up
+     // show info div
+     $('#info').removeClass('up');
+   }
+   prevScroll = currentScroll;
+});
+
+<% if(roomID){ %>
+/* WEB SOCKET FUNCTIONS */
+var socket = io.connect('http://141.59.164.11:3000');
+function closeGame (){
+  socket.emit('closeAdventure', { roomID:'<%= roomID %>' });
+  window.location.href = "/close/<%= roomID %>";
+}
+
+function returnToGame (){
+  window.location.href = '/returnTo/<%= roomID %>';
+}
+<% } %>
+</script>
+
+</body>
+</html>

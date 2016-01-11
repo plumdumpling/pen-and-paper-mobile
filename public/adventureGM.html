@@ -1,0 +1,1302 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>Pen &amp; Paper | v1.0.0</title>
+
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link rel="stylesheet" type="text/css" href="css/adventure.css">
+</head>
+<body class="preload gamemaster">
+
+<div id="wrappers">
+  <div id="scenesWrapper" class="contentBlock">
+    <h1>Das Abenteuer</h1>
+    <div id="adventureText"></div>
+    <div id="infos">
+      <div id="infosInner" class="hide">
+        <a class="minimize"></a>
+        <!-- dotted line -->
+        <svg width="100%" height="6px" class="dottedLine">
+          <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div id="enemiesWrapper" class="contentBlock">
+    <h1>Die Gegner</h1>
+    <div id="battle"></div>
+  </div>
+
+  <div id="playersWrapper" class="contentBlock">
+    <h1>Die Abenteurer</h1>
+    <div id="players"></div>
+  </div>
+</div>
+
+<!-- pop-ups -->
+<div class="popup hide"><div id="diceBox"></div></div>
+
+<div id="bonus" class="hide"><span id="bonusValue"></span></div>
+
+<div class="popup hide">
+  <div id="playerOptions">
+    <a class="minimize"></a>
+    <!-- dotted line -->
+    <svg width="100%" height="6px" class="dottedLine">
+      <line x1="0" x2="2000" y1="2" y2="2" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/>
+    </svg>
+    <h3 id="charactername"></h3>
+
+    <div id="minorInjury" class="injury"><button name="injury" class="minus" value="-1"></button><span></span> kleine Verletzung(en)<button name="injury" class="plus" value="1"></button></div>
+    <div id="middleInjury" class="injury"><button name="injury" class="minus" value="-2"></button><span></span> mittlere Verletzung(en)<button name="injury" class="plus" value="2"></button></div>
+    <div id="severeInjury" class="injury"><button name="injury" class="minus" value="-3"></button><span></span> schwere Verletzung(en)<button name="injury" class="plus" value="3"></button></div>
+    <br>
+    <p>Konstitution</p>
+    <p><button name="constitution" class="minus" value="-1"></button>
+    <% for(var i=0; i<12; i++){ %><input type="checkbox" name="constitution" value="<%= (i+1) %>"/><span></span><% }%>
+    <button name="constitution" class="plus" value="1"></button></p>
+    <br>
+    <p>Mit <input type="number" name="characterpoints" min="0" value="0"></input> Charakterpunkt(en) belohnen</p>
+    <br>
+    <a class="confirm" onClick="closeOptions();">Änderungen speichern</a>
+  </div>
+</div>
+
+<div class="popup hide">
+  <div id="attackLevel">
+    <h3></h3>
+    <p></p>
+    <a data-level="1">schwach</a>
+    <a data-level="2">mittel</a>
+    <a data-level="3">stark</a>
+  </div>
+</div>
+
+<% include popupAndNotification %>
+
+<!-- sidebars -->
+<div id="sidebar">
+  <nav id="buttons">
+    <button data-content="settings"></button>
+      <svg width="20px" height="6px" class="dottedLine"><line x1="0" x2="20" y1="2" y2="2" stroke="#4a5a64" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/></svg>
+    <button data-content="scenes"></button>
+      <svg width="20px" height="6px" class="dottedLine"><line x1="0" x2="20" y1="2" y2="2" stroke="#893354" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/></svg>
+    <button data-content="enemies"></button>
+      <svg width="20px" height="6px" class="dottedLine"><line x1="0" x2="20" y1="2" y2="2" stroke="#e8565e" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/></svg>
+    <button data-content="items"></button>
+      <svg width="20px" height="6px" class="dottedLine"><line x1="0" x2="20" y1="2" y2="2" stroke="#fc8368" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/></svg>
+    <button data-content="games"></button>
+      <svg width="20px" height="6px" class="dottedLine"><line x1="0" x2="20" y1="2" y2="2" stroke="#e5dddc" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/></svg>
+  </nav>
+
+  <div id="sidebarContent">
+    <% include sidebars/settings %>
+    <% include sidebars/scenes %>
+    <% include sidebars/enemies %>
+    <% include sidebars/items %>
+    <% include sidebars/games %>
+  </div>
+</div>
+
+<!-- overlays -->
+<div id="choosePlayer" class="hide">
+  <h3>Wähle die Spieler an welche die Inhalte gesendet werden sollen.</h3>
+  <center><a id="choosePlayerSendBtn" class="gamemasterButton disabled" onClick="sendContentToPlayers();">Inhalte senden</a></center>
+</div>
+
+<div id="shadowBox2"></div>
+
+
+<!-- JavaScript - libraries and modules  -->
+<script src="js/jquery-1.11.2.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/draggabilly.pkgd.min.js"></script>
+
+<!-- JavaScript - custom scripts  -->
+<script type="text/javascript" src="js/basic.js"></script>
+<script type="text/javascript" src="js/gamemaster.js"></script>
+<script type="text/javascript" src="js/tutorial.js"></script>
+<script type="text/javascript">
+var socket = io.connect('http://141.59.164.11:3000');
+var roomID = '<%= roomID %>';
+var inBattle = <%= inBattle %>;
+
+var players = <%- JSON.stringify(players) %>;
+var playerOptions = <%- JSON.stringify(playerOptions) %>;
+
+socket.emit('connectGamemaster', {username:'<%= username %>', roomID:roomID });
+
+/* ERROR HANDLING */
+socket.on('error', function (){ popup('Hoppla, da lief was schief!'); });
+
+
+/* UPDATE PLAYER LIST */
+socket.on('updatePlayerList', function (data){
+  // check if number of players changed
+  if(data.players.length === players.length){
+    // update local players array
+    players = data.players;
+
+    for(var i=0; i<players.length; i++){
+      // add class disabled if player is disconnected
+      if(!players[i].connected) $('#'+players[i].name).addClass('disabled');
+      else $('#'+players[i].name).removeClass('disabled');
+      // update player's socket id
+      $('#'+players[i].name).attr('data-socket', players[i].socketID);
+    }
+  }
+  else{
+    // update local players array
+    players = data.players;
+
+    initPlayerButtons();
+  }
+});
+
+function initPlayerButtons (){
+  // // clear div with players lists
+  var playersDiv = document.getElementById('players');
+  playersDiv.innerHTML = '';
+
+  for(var i=0; i<players.length; i++){
+    // // create a button with class player for every player in room
+    var div = document.createElement('div');
+    div.className = 'player draggable';
+    // add class disabled if player is disconnected
+    if(!players[i].connected) $(div).addClass('disabled');
+    // set div id to players username to identify
+    div.id = players[i].name;
+    // display image and charactername in div
+    div.innerHTML = '<img src="'+players[i].imagepath+'" alt="'+players[i].charactername+'"/><p>'+players[i].charactername+'</p>';
+    // save character informations in div
+    $(div).attr({'data-charactername':players[i].charactername, 'data-characterID':players[i].characterID, 'data-socket':players[i].socketID});
+    // add div to players list
+    playersDiv.appendChild(div);
+  }
+
+  // make players draggable
+  initializeDraggables();
+}
+
+
+/* LOAD SAVEGAME */
+$(document).ready(function (){
+  // initialize player buttons
+  initPlayerButtons();
+
+  <% if(tutorial.tutorialMode=='1'){ %>startTutorialNow();<% } %>
+
+  // decode and display start scenes
+  var div = document.createElement('div');
+  var decodedContent;
+
+  <% for(var i=0; i<scenes.length; i++){ %>
+  // decode description html from database
+  div.innerHTML = '<%= scenes[i].description %>';
+  decodedContent = div.firstChild.nodeValue;
+  // insert decoded html in div
+  $('#adventureText').append('<h3><%= scenes[i].name %></h3><p>'+decodedContent+'</p>');
+  // document.getElementById('adventureText').innerHTML = '<h3><%= scenes[i].name %></h3><p>'+decodedContent+'</p>';
+  <% if(scenes[i].keywordsInfo){ %>
+  // decode keywords info html from database
+  div.innerHTML = '<%= scenes[i].keywordsInfo %>';
+  decodedContent = div.firstChild.nodeValue;
+  // insert decoded html in div
+  $('#infosInner').append(decodedContent);
+  <% } %>
+  <% if(i+1 >= scenes.length){ %>
+  document.getElementById('wrappers').style.backgroundImage = 'url("<%= scenes[i].imagepath %>")';
+  <% } %>
+  <% } %>
+
+  <% if(inBattle){ %>
+  // display enemies
+  <% for(var i=0; i<enemies.data.length; i++){ %>
+  var div = document.createElement('div');
+  div.className = 'enemies<% if(enemies.data[i].hp <= 0){ %> dead<% }else{ %> draggable<% } %>';
+  div.id = '<%= enemies.data[i].uniqueID %>';
+  // get enemie id
+  var enemieID = '<%= enemies.data[i].id %>';
+  if(enemieID.indexOf('u') > -1) $(div).attr('data-id', 'u'+enemieID.split('u')[1]);
+  else $(div).attr('data-id', enemieID);
+  // enemie informations
+  <% for(var n=0; n<enemies.content.length; n++){ %>
+  <% if(enemies.content[n].id===enemies.data[i].id || 'u'+enemies.content[n].id===enemies.data[i].id){ %>
+  var name = '<%= enemies.content[n].name %>';
+  var description = '<%= enemies.content[n].description %>';
+  var imagepath = '<%= enemies.content[n].imagepath %>';
+  <% } %>
+  <% } %>
+  div.innerHTML = '<div class="image" style="background-image: url('+imagepath+');"/></div><div class="text"><h4>'+name+'</h4><p>'+description+'</p></div>';
+  // add hp, level and strength to enemie div
+  var enemieInfoDiv = document.createElement('div');
+  for(var i=0; i<3; i++){
+    var input = document.createElement('input');
+    $(input).attr({'type':'number', 'readonly':true});
+    switch (i) {
+      case 0:
+        $(enemieInfoDiv).append('<p>HP</p>');
+        $(input).attr({'name':'hp', 'min':1, 'max':10, 'value':<%= enemies.data[i].hp %>, 'style':'width:<%= enemies.data[i].hp %>0px'});
+        break;
+      case 1:
+        $(enemieInfoDiv).append('<p>Level</p>');
+        $(input).attr({'name':'level', 'min':0, 'max':16, 'value':<%= enemies.data[i].level %>});
+        break;
+      case 2:
+        $(enemieInfoDiv).append('<p>Angriffskraft</p>');
+        $(input).attr({'name':'strength', 'min':1, 'max':3, 'value':<%= enemies.data[i].strength %>});
+        break;
+    }
+    $(enemieInfoDiv).append(input);
+  }
+  $(enemieInfoDiv).addClass('info');
+  $(div).append(enemieInfoDiv);
+  $(div).append('<br class="clear"/>');
+
+  // receivers of the enemie
+  $(div).attr('data-usernames', '<%= enemies.data[i].receivers %>');
+  // add enemie to battle div
+  $('#battle').append(div);
+  // show battle div on view
+  $('#enemiesWrapper').addClass('visible');
+  <% } %>
+
+  // make enemies draggable
+  initializeDraggables();
+  <% } %>
+
+  // make strings in player options array to integers
+  for(var i=0; i<playerOptions.length; i++){
+    playerOptions[i].cp = parseInt(playerOptions[i].cp);
+    playerOptions[i].minorInjury = parseInt(playerOptions[i].minorInjury);
+    playerOptions[i].middleInjury = parseInt(playerOptions[i].middleInjury);
+    playerOptions[i].severeInjury = parseInt(playerOptions[i].severeInjury);
+    playerOptions[i].health = parseInt(playerOptions[i].health);
+    playerOptions[i].constitution = parseInt(playerOptions[i].constitution);
+  }
+
+  // send current scene image to players
+  socket.emit('sceneImage', { roomID: '<%= roomID %>', imagepath: document.getElementById('wrappers').style.backgroundImage });
+});
+
+
+/* KEYWORDS INFOS */
+var keywordInfoActive = false;
+$(document).on('click', '#adventureText button', function (){
+  // show keywords info for clicked keyword button
+	var name = $(this).attr('name');
+	$('#infosInner div').each(function (){
+		if($(this).attr('id')===name) $(this).addClass('active');
+		else $(this).removeClass('active');
+	});
+  // show infos and shadow box
+  $('#infosInner').removeClass('hide');
+  $('#shadowBox').addClass('visible');
+
+  keywordInfoActive = true;
+});
+
+$(document).on('click', '#infosInner a.minimize', function (){
+  // hide keyword info by click on minimize button
+  hideKeywordInfo();
+});
+
+$('#shadowBox').click(function (){
+  if(keywordInfoActive){
+    // hide keyword info by click on shadowbox
+    hideKeywordInfo();
+  }
+});
+
+function hideKeywordInfo(){
+  // hide infos and shadow box
+  $('#infosInner').addClass('hide');
+  $('#shadowBox').removeClass('visible');
+  // hide active keywords info
+  $('#infosInner div').each(function (){
+    $(this).removeClass('active');
+  });
+
+  keywordInfoActive = false;
+}
+
+
+/* SAVE ENEMIES */
+function saveEnemies (){
+  console.log('SAVE ENEMIES');
+  // get data from enemies in battle
+  var enemiesData = [];
+  $('#battle .enemies').each(function (){
+    var enemie = {};
+    // get enemie id
+    enemie.id = $(this).attr('data-id');
+    // get unique id
+    enemie.uniqueID = $(this).attr('id');
+    // get hp, level and strength values
+    $(this).children('.info').children('div').children('input').each(function (){
+      if($(this).attr('name') === 'hp') enemie.hp = $(this).val();
+      else if($(this).attr('name') === 'level') enemie.level = $(this).val();
+      else if($(this).attr('name') === 'strength') enemie.strength = $(this).val();
+    });
+    // get players who received enemie
+    enemie.receivers = $(this).attr('data-usernames');
+    // add enemie to array
+    enemiesData.push(enemie);
+  });
+
+  // make string from array and objects in array
+  for(var i=0; i<enemiesData.length; i++){
+    enemiesData[i] = JSON.stringify(enemiesData[i]);
+  }
+  var dataString = enemiesData.join();
+
+  // save enemies data in savegame
+  $.ajax({
+    url: '/saveEnemies',
+    type: 'PUT',
+    data: {enemiesData:dataString}
+  })
+  .done(function(response) {
+    if(!response.err){
+      // send update of enemies to player
+      socket.emit('updateEnemies', {roomID:roomID, enemiesData:enemiesData});
+    }
+    else{
+      popup('Hoppla, da lief was schief!', 'Die Gegner hatten keine Lust auf den Kampf und sind weggerannt. Bitte lade die Seite neu und versuche es erneut.');
+    }
+  })
+  .fail(function() {
+    popup('Hoppla, da lief was schief!', 'Die Gegner hatten keine Lust auf den Kampf und sind weggerannt. Bitte lade die Seite neu und versuche es erneut.');
+  });
+}
+
+function stopBattle (){
+  $.ajax({
+    url: '/deleteEnemies',
+    type: 'DELETE'
+  })
+  .done(function(response) {
+    if(!response.err){
+      // send update of stopped battle to players
+      socket.emit('stopBattle', {roomID:roomID});
+
+      inBattle = false;
+      // clear and hide battle div
+      $('#enemiesWrapper').removeClass('visible');
+      $('#enemiesWrapper').addClass('hidden');
+      setTimeout(function (){
+        $('#enemiesWrapper').removeClass('hidden');
+      }, 1000);
+      $('#battle').empty();
+    }
+    else{
+      popup('Hoppla, da lief was schief!', 'Der Kampf konnte nicht beendet werden. Bitte lade die Seite neu und versuche es erneut.');
+    }
+  })
+  .fail(function() {
+    popup('Hoppla, da lief was schief!', 'Der Kampf konnte nicht beendet werden. Bitte lade die Seite neu und versuche es erneut.');
+  });
+}
+
+
+/* LOAD CONTENT PREVIEW */
+$(document).on('click', '#sidebar #buttons button', function (event){
+  if(!$('#sidebar').hasClass('open')){
+    // request content from server if not done yet
+    console.log('open sidebar for '+$(event.target).attr('data-content')+' '+$('#'+$(event.target).attr('data-content')).attr('data-requested'));
+    if($('#'+$(event.target).attr('data-content')).attr('data-requested') !== 'true'){
+      switch ($(event.target).attr('data-content')) {
+        case 'scenes':
+          $('#'+$(event.target).attr('data-content')).attr('data-requested', 'true');
+          requestContent('Scenes');
+          break;
+        case 'enemies':
+          $('#'+$(event.target).attr('data-content')).attr('data-requested', 'true');
+          requestContent('Enemies');
+          break;
+        case 'items':
+          $('#'+$(event.target).attr('data-content')).attr('data-requested', 'true');
+          requestContent('Items');
+          break;
+      }
+    }
+    // mark button as clicked
+    $(event.target).addClass('active');
+
+    // check if content type was opened before
+    if($(event.target).attr('data-content') !== collectedContentType){
+      // clear content collection
+      collectedContent = [];
+      $('.collectionInner').each(function (){
+        $(this).empty();
+        var type = $(this).parent().parent().parent().attr('id');
+        if(type === 'items' || type === 'enemies'){
+          $(this).css('width', '0px');
+        }
+      });
+      // disable confirm buttons
+      $('.top .confirmBtn').each(function (){
+        $(this).addClass('disabled');
+      });
+    }
+  }
+
+  // show or hide sidebar
+  toggleSidebar($(event.target).attr('data-content'));
+});
+
+function requestContent(table) {
+  // get category table
+  var category = table.substring(0, table.length-1);
+  var categoryTable = category+'Categories';
+  // request content from server
+  $.post('/selectContent', { table:table, userTable:'User'+table, categoryTable:categoryTable }, function (response){
+    if(!response.err){
+      // clear collected content
+      var contentType = table.toLowerCase();
+      $('#'+contentType+' .bottom .contents').empty();
+      $('#'+contentType+' .bottom .userContents').empty();
+      collectedContent = [];
+
+      // add contents to sidebar
+      for (var i=0; i<response.content.length; i++) {
+        addSlotsWith(false, contentType, response.content[i].id, response.content[i].name, response.content[i].description, response.content[i].category, response.content[i].imagepath);
+      }
+      // check if user contents are available
+      var content = '';
+      switch (contentType) {
+        case 'items':
+          content = 'Gegenstände';
+          break;
+        case 'enemies':
+          content = 'Gegner';
+          break;
+        case 'scenes':
+          content = 'Szenen';
+          break;
+        default:
+          content = 'Inhalte';
+      }
+      if(response.userContent.length <= 0) $('#'+contentType+' .bottom .userContents').html('<center><p>Leider wurden von dir und deinen Mitspielern<br/>bisher keine '+content+' erstellt.</p></center>');
+      for (var i=0; i<response.userContent.length; i++) {
+        addSlotsWith(true, contentType, response.userContent[i].id, response.userContent[i].name, response.userContent[i].description, response.userContent[i].category, response.userContent[i].imagepath);
+      }
+
+      // add category list to sidebar
+      for(var i=0; i<response.categories.length; i++){
+        $('#'+contentType+' .bottom select').append('<option value="'+response.categories[i].id+'">'+response.categories[i].name+'</option>');
+      }
+
+      // remember requested content
+      $('#'+contentType).attr('data-requested', 'true');
+    }
+    else{
+      popup('Hoppla, da lief was schief!', 'Bitte versuche es erneut und lade die Seite gegebenenfalls neu.');
+    }
+  }).fail(function (){
+    popup('Hoppla, da lief was schief!', 'Bitte versuche es erneut und lade die Seite gegebenenfalls neu.');
+  });
+}
+
+function addSlotsWith (isUserContent, contentType, id, name, description, category, image){
+  // create slot with data
+  var div = document.createElement('div');
+  div.className = 'slot '+contentType;
+  // save id in slot
+  if(isUserContent) $(div).attr('data-id', 'u'+id);
+  else $(div).attr('data-id', id);
+  // save category in slot
+  $(div).attr('data-category', category);
+
+  div.innerHTML = '<div class="image" style="background-image: url('+image+');"/></div><div class="text"><h4>'+name+'</h4><p>'+description+'</p></div>';
+  // add slot to sidebar
+  if(isUserContent) $('#'+contentType+' .bottom .userContents').append(div);
+  else $('#'+contentType+' .bottom .contents').append(div);
+}
+
+function categoryChanged (sender, contentType){
+  // get category
+  var newCategory = $(sender).val();
+  console.log('newCategory '+newCategory);
+  // check if contents of all categories should be shown
+  var showAll = false;
+  if(newCategory == '0') showAll = true;
+  $('#'+contentType+' .bottom .contents .slot').each(function (){
+    // show all content elements from the selected category
+    if($(this).attr('data-category') == newCategory || showAll) $(this).show();
+    else $(this).hide();
+  });
+  $('#'+contentType+' .bottom .userContents .slot').each(function (){
+    // show all user content elements from the selected category
+    if($(this).attr('data-category') == newCategory || showAll) $(this).show();
+    else $(this).hide();
+  });
+}
+
+function toggleContent (sender, contentType){
+  if($(sender).hasClass('dbCont')){
+    // switch to user contents
+    $(sender).removeClass('dbCont');
+    $(sender).addClass('uCont');
+    $('#'+contentType+' .bottom .contents').addClass('hide');
+    $('#'+contentType+' .bottom .userContents').removeClass('hide');
+  }
+  else{
+    // switch to database contents
+    $(sender).addClass('dbCont');
+    $(sender).removeClass('uCont');
+    $('#'+contentType+' .bottom .contents').removeClass('hide');
+    $('#'+contentType+' .bottom .userContents').addClass('hide');
+  }
+}
+
+
+/* COLLECT CONTENT AND SEND TO PLAYER */
+var choosePlayerToSendContent = false;
+var selectedPlayerSockets = [], selectedPlayerNames = [];
+var collectedContent = [];
+var collectedContentType;
+
+$(document).on('click', '.slot', function() {
+  // get and remember content id
+  var id = $(this).attr('data-id');
+
+  if($(this).hasClass('items')){
+    collectedContentType = 'items';
+    // remember selected item id
+    collectedContent.push(id);
+  }
+  else if($(this).hasClass('enemies')){
+    collectedContentType = 'enemies';
+    // remember selected enemie id
+    collectedContent.push({id:id});
+  }
+  else if($(this).hasClass('scenes')){
+    collectedContentType = 'scenes';
+    // mark scene as selected and remember scene id
+    $('#scenes .bottom .contents .slot, #scenes .bottom .userContents .slot').each(function (){
+      $(this).removeClass('selected');
+    });
+    $(this).addClass('selected');
+    collectedContent = [id];
+  }
+  else if($(this).hasClass('game')){
+    collectedContentType = 'games';
+    // mark game as selected and remember game id
+    $('#gameSelection .slot').each(function (){
+      $(this).removeClass('selected');
+    });
+    $(this).addClass('selected');
+    collectedContent = [{id:id, title:$(this).children('h3').html(), description:$(this).children('p.pDescription').html()}];
+    // insert text in content collection div
+    var div = $(this).clone(true);
+    $('#games .top .contentCollection .collectionInner').html($(div).html());
+  }
+
+  // enable confirm button
+  $('#'+collectedContentType+' .top a').removeClass('disabled');
+
+  if(collectedContentType === 'items' || collectedContentType === 'enemies'){
+    // get copy of selected content for collection div
+    var div = $(this).clone(true);
+    $(div).removeClass('slot');
+
+    if(collectedContentType === 'enemies'){
+      // add unique id
+      var uniqueID = Math.floor(Math.random()*26)+Date.now();
+      while($('#'+uniqueID).length > 0){
+        uniqueID = Math.floor(Math.random()*26)+Date.now();
+      }
+      $(div).attr('id', uniqueID);
+
+      // let the player choose hp, level and strength of the enemie
+      var enemieInfoDiv = document.createElement('div');
+      for(var i=0; i<3; i++){
+        var name ;
+        var input = document.createElement('input');
+        $(input).attr({'type':'number'});
+        switch (i) {
+          case 0:
+            $(enemieInfoDiv).append('<p>HP</p>');
+            $(input).attr({'name':'hp', 'min':1, 'max':10, 'value':7, 'readonly':true});
+            name = 'hp';
+            break;
+          case 1:
+            $(enemieInfoDiv).append('<p>Level</p>');
+            $(input).attr({'name':'level', 'min':0, 'max':16, 'value':9, 'readonly':true});
+            name = 'level';
+            break;
+          case 2:
+            $(enemieInfoDiv).append('<p>Angriff</p>');
+            $(input).attr({'name':'strength', 'min':1, 'max':3, 'value':2, 'readonly':true});
+            name = 'strength';
+            break;
+        }
+        var inputDiv = document.createElement('div');
+        $(inputDiv).append('<a class="up" onClick="enemieValue(true, \''+name+'\');"></a>');
+        $(inputDiv).append(input);
+        $(inputDiv).append('<a class="down" onClick="enemieValue(false, \''+name+'\');"></a>');
+        $(enemieInfoDiv).append(inputDiv);
+      }
+      $(enemieInfoDiv).addClass('info');
+      $(enemieInfoDiv).attr('id', 'set-'+uniqueID);
+      // open popup to set enemie infos
+      popupWithContent('Informationen zum Gegner', enemieInfoDiv, [{f:"addEnemieToCollection('"+uniqueID+"')", title:"OK"}]);
+      $('#shadowBox2').addClass('visible');
+    }
+
+    // add button to remove content from collection
+    $(div).append('<a class="remove" onClick="removeContentFromCollection(this);"></a>');
+
+    // add content to collection div and resize collection div
+    $('#'+collectedContentType+' .top .contentCollection .collectionInner').append(div);
+    if(collectedContentType === 'items') $('#'+collectedContentType+' .top .contentCollection .collectionInner').css('width', ($('#'+collectedContentType+' .contentCollection .collectionInner').width()+70)+'px');
+    else $('#'+collectedContentType+' .top .contentCollection .collectionInner').css('width', ($('#'+collectedContentType+' .contentCollection .collectionInner').width()+215)+'px');
+  }
+});
+
+function enemieValue (up, name){
+  var currentVal = parseInt($('#popupInner .info div input[name="'+name+'"]').val());
+  console.log(currentVal);
+  if(up && currentVal<$('#popupInner .info div input[name="'+name+'"]').attr('max')) $('#popupInner .info div input[name="'+name+'"]').val(currentVal+1);
+  else if(!up && currentVal>$('#popupInner .info div input[name="'+name+'"]').attr('min')) $('#popupInner .info div input[name="'+name+'"]').val(currentVal-1);
+}
+
+function addEnemieToCollection (id){
+  // make inputs text input and readonly
+  $('#set-'+id+' div input').each(function (){
+    $(this).attr('type', 'text');
+  });
+  // append enemies info to content collection
+  $('#'+id).append($('#set-'+id));
+  $('#'+id).append('<br class="clear"/>');
+  // close popup
+  $('#popup').addClass('hide');
+  $('#shadowBox2').removeClass('visible');
+}
+
+function removeContentFromCollection (sender){
+  // remove content from collection
+  for(var i=0; i<collectedContent.length; i++){
+    if(($(sender).parent().hasClass('items') && $(sender).parent().attr('data-id') == collectedContent[i]) ||
+      ($(sender).parent().hasClass('enemies') && $(sender).parent().attr('data-id') == collectedContent[i].id)){
+      var index = collectedContent.indexOf(collectedContent[i]);
+      collectedContent.splice(index, 1);
+    }
+  }
+  // resize content collection div
+  if($(sender).parent().hasClass('items')) $('#items .top .contentCollection .collectionInner').css('width', ($('#'+collectedContentType+' .contentCollection .collectionInner').width()-70)+'px');
+  else $('#enemies .top .contentCollection .collectionInner').css('width', ($('#'+collectedContentType+' .contentCollection .collectionInner').width()-215)+'px');
+
+  // remove content from screen
+  $(sender).parent().remove();
+}
+
+function closeSidebarToSendContent (){
+  // check if button is disabled and if there is content selected
+  if($(this).hasClass('disabled') || collectedContent.length <= 0) return;
+
+  // close sidebar
+  toggleSidebar(null);
+
+  if(collectedContentType === 'scenes'){
+    // continue with scene
+    continueWithScene(collectedContent[0]);
+  }
+  else{
+    // send content to players
+    // show invitation to choose player
+    setTimeout(function (){
+      $('#choosePlayer').removeClass('hide');
+      $('#playersWrapper').css('z-index', '52');
+    }, 300);
+    choosePlayerToSendContent = true;
+
+    // add enemie variables uniqueID, hp, level and strength
+    if(collectedContentType === 'enemies'){
+      $('#enemies .contentCollection .collectionInner .enemies').each(function (index){
+        collectedContent[index].uniqueID = $(this).attr('id');
+        collectedContent[index].hp = $(this).children('.info').children('div').children('input[name="hp"]').val();
+        collectedContent[index].level = $(this).children('.info').children('div').children('input[name="level"]').val();
+        collectedContent[index].strength = $(this).children('.info').children('div').children('input[name="strength"]').val();
+      });
+    }
+  }
+}
+
+function sendContentToPlayers (){
+  // check if button is disabled or if there is no content data available
+  if($(this).hasClass('disabled') || collectedContent.length <= 0) return false;
+
+  // update view
+  $('#choosePlayer').children('h3').html('Inhalte werden gesendet ...');
+  $('#choosePlayerSendBtn').addClass('hide');
+
+  // send content to players
+  var contentData = collectedContent;
+
+  // add receiver names to enemies
+  for(var i=0; i<contentData.length; i++) {
+    contentData[i].receivers = selectedPlayerNames.join();
+  }
+
+  // send content to player via websockets
+  socket.emit('sendContentToPlayers', { contentType:collectedContentType.charAt(0).toUpperCase()+collectedContentType.slice(1), content:contentData, playerSockets:selectedPlayerSockets });
+}
+
+socket.on('sendContentCallback', function (data){
+  if(data.err) popup('Hoppla, da lief was schief!', 'Der Postbote hat sich verlaufen und die Inhalte kamen nicht beim Spieler an. Bitte versuche es erneut.');
+  else{
+    // player received content successfully
+    if(collectedContentType === 'enemies'){
+      // clone all enemies
+      $('#enemies .contentCollection .collectionInner').contents().each(function (){
+        var div = $(this).clone(true);
+        $(div).children('.remove').remove();
+        // add player list to enemie
+        var receiversList = selectedPlayerNames.join();
+        $(div).attr('data-usernames', receiversList);
+
+        // add draggable class
+        $(div).addClass('draggable');
+
+        // add enemies to battle div
+        $('#battle').append(div);
+        // show enemies on view
+        $('#enemiesWrapper').addClass('visible');
+      });
+
+      // save enemies in savegame
+      saveEnemies();
+
+      // make enemies draggable
+      initializeDraggables();
+    }
+  }
+  // clear and reset all data and views
+  // clear collected content
+  if(collectedContentType === 'items' || collectedContentType === 'enemies'){
+    $('#'+collectedContentType+' .top .contentCollection .collectionInner').empty();
+    $('#'+collectedContentType+' .top .contentCollection .collectionInner').css('width', '0px');
+  }
+  else if(collectedContentType === 'games'){
+    $('#'+collectedContentType+' .top .contentCollection .collectionInner').empty();
+  }
+  collectedContent = [];
+  collectedContentType = false;
+  // disable confirm buttons
+  $('.top .confirmBtn').each(function (){
+    $(this).addClass('disabled');
+  });
+  // reset player selection
+  choosePlayerToSendContent = false;
+  selectedPlayerSockets = [];
+  selectedPlayerNames = [];
+  $('#players .player, .slot').each(function (){
+    $(this).removeClass('selected');
+  });
+  // hide and reset invitation to choose player
+  $('#choosePlayer').addClass('hide');
+  $('#playersWrapper').css('z-index', '42');
+  $('#choosePlayer').children('h3').html('Wähle die Spieler an welche die Inhalte gesendet werden sollen.');
+  $('#choosePlayerSendBtn').removeClass('hide');
+  $('#choosePlayerSendBtn').addClass('disabled');
+});
+
+
+/* CONTINUE WITH NEW SCENE */
+function continueWithScene(id){
+  $.post('/nextScene', { sceneID:id }, function (response){
+    if(!response.err){
+      // add decoded scene to view
+      var div = document.createElement('div');
+      var decodedContent;
+
+      // decode description html from database
+      div.innerHTML = response.sceneData.description;
+      decodedContent = div.firstChild.nodeValue;
+      // insert decoded html in div
+      $('#adventureText').append('<h3>'+response.sceneData.name+'</h3><p>'+decodedContent+'</p>');
+
+      if(response.sceneData.keywordsInfo){
+        // decode keywords info html from database
+        div.innerHTML = response.sceneData.keywordsInfo;
+        decodedContent = div.firstChild.nodeValue;
+        // insert decoded html in div
+        $('#infosInner').append(decodedContent);
+      }
+
+      // update view
+      document.getElementById('wrappers').style.backgroundImage = 'url('+response.sceneData.imagepath+')';
+      // update view for player
+      socket.emit('sceneImage', { roomID: '<%= roomID %>', imagepath: document.getElementById('wrappers').style.backgroundImage });
+
+      // remove mark from added scene in sidebar
+      $('#scenes .bottom .contents .slot, #scenes .bottom .userContents .slot').each(function (){
+        $(this).removeClass('selected');
+      });
+
+      // clear and reset all data and views
+      // clear collected content
+      collectedContent = [];
+      collectedContentType = false;
+      // disable confirm buttons
+      $('.top .confirmBtn').each(function (){
+        $(this).addClass('disabled');
+      });
+    }
+    else{
+      popup('Hoppla, da lief was schief!', 'Der Weg war wohl zu weit. Die Szene konnte leider nicht geladen werden. Bitte versuche es erneut.');
+    }
+  }).fail(function (){
+    popup('Hoppla, da lief was schief!', 'Der Weg war wohl zu weit. Die Szene konnte leider nicht geladen werden. Bitte versuche es erneut.');
+  });
+}
+
+socket.on('requestSceneImage', function (){
+  // send current scene image to players
+  socket.emit('sceneImage', { roomID: '<%= roomID %>', imagepath: document.getElementById('wrappers').style.backgroundImage });
+});
+
+/* PLAYERS */
+var draggableMoving = false;
+function toggleDraggableMoving (newValue){
+  setTimeout(function (){
+    draggableMoving = newValue;
+  }, 100);
+}
+
+$(document).on('click', '#players div', function (event){
+  // check if player was selected to send content or
+  console.log('open '+draggableMoving);
+  if(choosePlayerToSendContent){
+    // add or remove player socket to or from array
+    if($(this).hasClass('selected')){
+      var socketIndex = selectedPlayerSockets.indexOf($(this).attr('data-socket'));
+      selectedPlayerSockets.splice(socketIndex, '1');
+      var nameIndex = selectedPlayerNames.indexOf($(this).attr('id'));
+      selectedPlayerNames.splice(nameIndex, '1');
+      $(this).removeClass('selected');
+
+      if(selectedPlayerNames.length > 0){ $('#choosePlayerSendBtn').removeClass('disabled'); }
+      else{ $('#choosePlayerSendBtn').addClass('disabled'); }
+    }
+    else if(!$(this).hasClass('disabled')){
+      selectedPlayerSockets.push($(this).attr('data-socket'));
+      selectedPlayerNames.push($(this).attr('id'));
+      $(this).addClass('selected');
+
+      $('#choosePlayerSendBtn').removeClass('disabled');
+    }
+  }
+  else if(!draggableMoving){
+    // show options for player
+    $('#playerOptions').parent().removeClass('hide');
+    $('#shadowBox').addClass('visible');
+
+    // get options from array and set options for player in player option div
+    var selectedOptions;
+    for(var i=0; i<playerOptions.length; i++) {
+      if(playerOptions[i].id == $(this).attr('data-characterID')) selectedOptions = playerOptions[i];
+    }
+
+    // display character name
+    $('#charactername').html($(this).attr('data-charactername'));
+
+    // add injuries
+    $('#minorInjury').children('span').html(selectedOptions.minorInjury);
+    $('#middleInjury').children('span').html(selectedOptions.middleInjury);
+    $('#severeInjury').children('span').html(selectedOptions.severeInjury);
+
+    // check as many checkboxes as the player constitution is high
+    $('#playerOptions input[type=checkbox][name=constitution]').each(function (index){
+      if(index < selectedOptions.constitution) $(this).prop('checked', true);
+    });
+
+    // reset characterpoints input fieldset
+    $('#playerOptions p input[name="characterpoints"]').val('0');
+
+    // save player's name and socket in div
+    $('#playerOptions').attr('data-playername', $(this).attr('id'));
+    $('#playerOptions').attr('data-socket', $(this).attr('data-socket'));
+    $('#playerOptions').attr('data-characterID', $(this).attr('data-characterID'));
+  }
+});
+
+function closeOptions (){
+  console.log('save changes in player options and send to player');
+  // calculate changes in characterpoints
+  if($('input[type=number][name="characterpoints"]').val() > 0){
+    for(var i=0; i<playerOptions.length; i++){
+      if(playerOptions[i].id == $('#playerOptions').attr('data-characterID')) {
+        playerOptions[i].cp += parseInt($('input[name=characterpoints]').val());
+      }
+    }
+  }
+  // get values from options div
+  for(var i=0; i<playerOptions.length; i++){
+    if(playerOptions[i].id == $('#playerOptions').attr('data-characterID')) {
+      // send changes to player and save them in database
+      socket.emit('sendOptionsToPlayer', { playerSocket:$('#playerOptions').attr('data-socket'), options:playerOptions[i] });
+      return;
+    }
+  }
+}
+
+socket.on('receiveOptionsCallback', function (data){
+  if(data.err) popup('Hoppla, da lief was schief!', 'Die Änderungen im Charakter konnten nicht gespeichert werden. Bitte versuche es erneut.');
+  else{
+    // player received options successfully
+    // hide options for player
+    $('#playerOptions').parent().addClass('hide');
+    $('#shadowBox').removeClass('visible');
+  }
+});
+
+$(document).on('click', '#playerOptions a.minimize', function(){
+    // hide options for player without saving
+    $('#playerOptions').parent().addClass('hide');
+    $('#shadowBox').removeClass('visible');
+});
+
+
+// injuries and health
+$(document).on('click', '#playerOptions button[name=injury]', function(){
+  // change number of injuries
+  var valueChanged = true;
+  for(var i=0; i<playerOptions.length; i++){
+    if(playerOptions[i].id == $('#playerOptions').attr('data-characterID')) {
+      var newValue = '';
+      switch ($(this).parent().attr('id')) {
+        case 'minorInjury':
+          playerOptions[i].minorInjury += $(this).val()/Math.abs($(this).val());
+          if(playerOptions[i].minorInjury < 0){
+            playerOptions[i].minorInjury = 0;
+            valueChanged = false;
+          }
+          newValue = playerOptions[i].minorInjury;
+          break;
+        case 'middleInjury':
+          playerOptions[i].middleInjury += $(this).val()/Math.abs($(this).val());
+          if(playerOptions[i].middleInjury < 0){
+            playerOptions[i].middleInjury = 0;
+            valueChanged = false;
+          }
+          newValue = playerOptions[i].middleInjury;
+          break;
+        case 'severeInjury':
+          playerOptions[i].severeInjury += $(this).val()/Math.abs($(this).val());
+          if(playerOptions[i].severeInjury < 0){
+            playerOptions[i].severeInjury = 0;
+            valueChanged = false;
+          }
+          newValue = playerOptions[i].severeInjury;
+          break;
+      }
+      if(valueChanged){
+        playerOptions[i].health -= parseInt($(this).val());
+        // display changes
+        $(this).parent().children('span').html(newValue);
+      }
+    }
+  }
+});
+
+// constitution
+$(document).on('click', '#playerOptions button[name=constitution]', function(){
+  console.log('change constitution '+$(this).val());
+  // change constitution value
+  for(var i=0; i<playerOptions.length; i++){
+    if(playerOptions[i].id == $('#playerOptions').attr('data-characterID')) {
+      playerOptions[i].constitution += parseInt($(this).val());
+      if(playerOptions[i].constitution > 12) playerOptions[i].constitution = 12;
+      else if(playerOptions[i].constitution < 0) playerOptions[i].constitution = 0;
+
+      // display changes
+      displayChangesInConstitution(playerOptions[i].constitution);
+    }
+  }
+});
+
+function displayChangesInConstitution (constitution){
+  $('#playerOptions input[type=checkbox][name=constitution]').each(function (index){
+    if(parseInt($(this).val()) <= constitution) $(this).prop('checked', true);
+    else $(this).prop('checked', false);
+  });
+}
+
+
+/* BATTLE */
+function attackEnemie (enemieElement, playerElement){
+  // choose attack level of the player
+  $('#attackLevel').parent().removeClass('hide');
+  $('#shadowBox').addClass('visible');
+  // update text
+  $('#attackLevel').children('h3').html($(playerElement).attr('data-charactername')+"'s Angriffskraft");
+  $('#attackLevel').children('p').html('Wähle die Angriffskraft, die '+$(playerElement).attr('data-charactername')+' mit seiner gewählten Waffe gegen den Gegner hat.');
+  // remember player and enemie's unique id
+  $('#attackLevel').attr('data-player', $(playerElement).attr('data-socket'));
+  $('#attackLevel').attr('data-enemie', $(enemieElement).attr('id'));
+}
+
+$(document).on('click', '#attackLevel a', function (){
+  // send dices to player to attack the enemie
+  socket.emit('attackTheEnemie', {level:$(this).attr('data-level'), enemie:$('#attackLevel').attr('data-enemie'), playerSocket:$('#attackLevel').attr('data-player')});
+  // hide attack level choice
+  $('#attackLevel').parent().addClass('hide');
+  $('#shadowBox').removeClass('visible');
+});
+
+socket.on('enemieGetHit', function (data){
+  console.log('enemit gets hit with '+data.hit);
+  var newHP = parseInt($('#'+data.enemie+' input[name=hp]').val())-parseInt(data.hit);
+  // check if enemie died
+  if(newHP <= 0){
+    newHP = 0;
+    // mark enemie as dead
+    $('#'+data.enemie).addClass('dead');
+    $('#'+data.enemie).removeClass('draggable');
+  }
+  // update health bar
+  $('#'+data.enemie+' input[name=hp]').val(newHP);
+  $('#'+data.enemie+' input[name=hp]').attr('style', 'width:'+newHP+'0px');
+
+  // stop battle if each enemie is dead
+  if($('#battle .enemies').length === $('#battle .enemies.dead').length){
+    stopBattle();
+  }
+  // save enemies
+  else saveEnemies();
+});
+
+function attackPlayer (playerElement, enemieElement){
+  // save variables for enemie and player in dice box
+  $('#diceBox').attr('data-enemie', $(enemieElement).attr('id'));
+  $('#diceBox').attr('data-player', $(playerElement).attr('id'));
+
+  // get 20 sided dice to attack the player
+  var div = document.createElement('div');
+  div.id = 'castOfDice1';
+  $(div).attr('data-trialType', 'playerAttack');
+  $(div).attr('data-levelValue', $('#'+$(enemieElement).attr('id')+' .info div input[name="level"]').val());
+  $(div).attr('data-diceSides', 20);
+
+  div.innerHTML = '<h3>Greife '+$(playerElement).attr('data-charactername')+' an</h3>';
+
+  div.innerHTML = div.innerHTML+'<button class="dice master">?</button>';
+  div.innerHTML = div.innerHTML+'<br><a onClick="castTheDice(this);">Würfeln</a>';
+  // add dice to dice box and show box
+  $('#diceBox').append(div);
+  $('#diceBox').parent().removeClass('hide');
+  $('#shadowBox').addClass('visible');
+}
+
+function hitPlayer (){
+  // clear dice box
+  $('#diceBox').empty();
+  // get data for enemie and player
+  var enemieID = $('#diceBox').attr('data-enemie');
+  var playerID = $('#diceBox').attr('data-player');
+
+  var div = document.createElement('div');
+  div.id = 'castOfDice2';
+  // get 6 sided dices to hit the player
+  $(div).attr('data-trialType', 'playerHit');
+  $(div).attr('data-diceSides', 3);
+
+  div.innerHTML = '<h3>Verletze '+$('#'+playerID).attr('data-charactername')+'</h3>';
+
+  // create as many dices as the strength value of the enemie says and add to div
+  var numOfDices = $('#'+enemieID+' input[name=strength]').val();
+  for(var m=0; m<numOfDices; m++) {
+    div.innerHTML = div.innerHTML+'<button class="dice">?</button>';
+  }
+  div.innerHTML = div.innerHTML+'<br><a onClick="castTheDice(this);">Würfeln</a>';
+  // add dice to dice box
+  $('#diceBox').append(div);
+}
+
+
+/* DICE RESULT */
+function castTheDice (sender){
+  if($(sender).hasClass('disabled')) return;
+  // disable clicked button so that player can cast the dice only once
+  $(sender).addClass('disabled');
+
+  var parentID = $(sender).parent().attr('id');
+  var diceSides = $(sender).parent().attr('data-diceSides');
+
+  // display pips for each dice
+  var allResults = [], masterResult;
+  $('#'+parentID+' .dice').each( function (){
+    this.innerHTML = getPips(diceSides);
+    allResults.push(this.innerHTML);
+    if($(this).hasClass('master')) masterResult = this.innerHTML;
+  });
+
+  // get the best result
+  var bestResult = Math.max.apply(Math, allResults);
+
+  // check if the result hits an player
+  if($('#'+parentID).attr('data-trialType') === 'playerHit'){
+    // update view for gamemaster
+    var injury = '';
+    switch (bestResult) {
+      case 1:
+        injury = 'leicht ';
+        break;
+      case 3:
+        injury = 'schwer ';
+        break;
+    }
+    setTimeout(function (){
+      // change headline
+      $('#'+parentID).children('h3').html($('#'+$('#diceBox').attr('data-player')).attr('data-charactername')+' wurde '+injury+'verletzt.');
+
+      // change values
+      var wiggleSet = false;
+      $('#'+parentID+' .dice').each(function (){
+        // crucial dice wiggle
+        if(parseInt(this.innerHTML)==bestResult && !wiggleSet){
+          $(this).addClass('wiggle');
+          wiggleSet = true;
+        }
+      });
+      setTimeout(function (){
+        // inform the player of the result of the enemie attack
+        socket.emit('hitThePlayer', {hit:bestResult, playerSocket:$('#'+$('#diceBox').attr('data-player')).attr('data-socket'), enemieID:$('#'+$('#diceBox').attr('data-enemie')).attr('id')});
+
+        // hide popup
+        $('#diceBox').parent().addClass('hide');
+        $('#shadowBox').removeClass('visible');
+
+        // clear dice box
+        $('#diceBox').empty();
+      }, 3000);
+    }, 1200);
+  }
+  // check if the result attacks an player
+  else if($('#'+parentID).attr('data-trialType') === 'playerAttack'){
+    // get result as text
+    var textResult = '';
+    if(masterResult=='1'){
+      $('#'+parentID).attr('data-result', '1');
+      textResult = 'kritischer Misserfolg';
+    }
+    else if(masterResult=='20'){
+      $('#'+parentID).attr('data-result', '4');
+      textResult = 'kritischer Erfolg';
+    }
+    else if(bestResult+parseInt($('#'+parentID).attr('data-levelValue')) >= 19){
+      $('#'+parentID).attr('data-result', '3');
+      textResult = 'Erfolg';
+    }
+    else{
+      $('#'+parentID).attr('data-result', '2');
+      textResult = 'Misserfolg';
+    }
+
+    var success = false;
+    if($('#'+parentID).attr('data-result')>=3) success = true;
+
+    // update view for gamemaster
+    setTimeout(function (){
+      // show bonus
+      $('#bonusValue').html('+ '+$('#'+parentID).attr('data-levelValue'));
+      $('#bonus').removeClass('hide');
+      setTimeout(function (){
+      $('#bonus').addClass('big');
+        setTimeout(function (){
+          $('#bonus').removeClass('big');
+          // change headline
+          $('#'+parentID).children('h3').html('Ein '+textResult);
+          // change values and hide bonus
+          var wiggleSet = false;
+          $('#'+parentID+' .dice').each(function (){
+            // crucial dice wiggle
+            if((($(this).hasClass('master') && (parseInt(this.innerHTML)==1 || parseInt(this.innerHTML)==20)) || parseInt(this.innerHTML)==bestResult) && !wiggleSet){
+              $(this).addClass('wiggle');
+              wiggleSet = true;
+            }
+            // update dice number
+            if(!$(this).hasClass('master') || ($(this).hasClass('master') && parseInt(this.innerHTML)>1 && parseInt(this.innerHTML)<20)){
+              this.innerHTML = parseInt(this.innerHTML)+parseInt($('#'+parentID).attr('data-levelValue'));
+            }
+          });
+          $('#bonus').addClass('hide');
+          setTimeout(function (){
+            // get final result
+            var div = document.createElement('div');
+            div.className = 'result';
+            div.innerHTML = '<p>Das Ergebnis war ein '+textResult+'.</p>';
+
+            var headline = document.createElement('h3');
+            headline.innerHTML += 'Du hast die Probe ';
+            // to stand the test, the final result must be 19 or higher
+            if(!success) headline.innerHTML += 'nicht ';
+            headline.innerHTML += 'bestanden.';
+            $(div).append(headline);
+
+            // show final result
+            $('#diceBox').empty();
+            $('#diceBox').html(div);
+
+            // hit player if trial was successful
+            if(success) $('#diceBox').append('<a onClick="hitPlayer();">OK</a>');
+            else $('#diceBox').append('<a onClick="closeDiceBox();">OK</a>');
+          }, 3000);
+        }, 1200);
+      }, 1000);
+    }, 100);
+  }
+}
+
+function getPips (diceSides){
+  return Math.floor((Math.random()*diceSides)+1);
+}
+
+/* TUTORIAL */
+$('#toggleTutorial').on('click', function (){
+  var tutorial;
+  if(!$('#tutorial input[name="tutorial"]').prop('checked')){
+    tutorial = true;
+  }
+  else{
+    tutorial = false;
+  }
+
+  // save changes in database
+  $.post('/toggleTutorial', { tutorial:tutorial }, function (response){
+    if(!response.err){
+      console.log(tutorial);
+      $('#tutorial input[name="tutorial"]').prop('checked', tutorial);
+      if(tutorial) startTutorialNow();
+      else stopTutorial();
+    }
+    else{
+      popup('Hoppla, da lief was schief!', 'Bitte versuche erneut den Tutorial-Modus zu ändern und lade die Seite gegebenenfalls neu.');
+    }
+  }).fail(function (){
+    popup('Hoppla, da lief was schief!', 'Bitte versuche erneut den Tutorial-Modus zu ändern und lade die Seite gegebenenfalls neu.');
+  });
+});
+
+
+/* CLOSE */
+$(document).on('click', '#close', function (){
+  socket.emit('closeAdventure', { roomID:roomID });
+});
+
+socket.on('adventureClosed', function (){
+  popup('Das Spiel wurde beendet.');
+  setTimeout(function(){ window.location.href = "http://141.59.164.11:3000/close/"+roomID }, 2000);
+});
+
+</script>
+
+</body>
+</html>

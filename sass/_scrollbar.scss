@@ -1,0 +1,23 @@
+// main: base.scss
+
+// style scrollbar
+// for webkit browsers
+::-webkit-scrollbar { width: 26px; height: 24px; background-color: rgba(255,255,255,0); }
+::-webkit-scrollbar-button { background-color: #fff; }
+::-webkit-scrollbar-track { background-color: rgba(255,255,255,0); }
+::-webkit-scrollbar-track-piece { background-color: $slate; border: 10px solid rgba(255,255,255,0); background-clip: padding-box; @include property('border-radius', "13px"); }
+::-webkit-scrollbar-thumb { background-color: #fff; border: 10px solid rgba(255,255,255,0); background-clip: padding-box; @include property('border-radius', "13px"); }
+::-webkit-scrollbar-corner { background-color: rgba(255,255,255,0); }
+::-webkit-resizer { background-color: rgba(255,255,255,0); }
+
+// for ie
+body{
+  scrollbar-base-color: $slateBlue;
+  scrollbar-3dlight-color: #fff;
+  scrollbar-highlight-color: #fff;
+  scrollbar-face-color: #fff;
+  scrollbar-arrow-color: $slate;
+  scrollbar-track-color: $slate;
+  scrollbar-shadow-color: $slateBlue;
+  scrollbar-dark-shadow-color: $slate;
+}

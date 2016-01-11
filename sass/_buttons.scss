@@ -1,0 +1,77 @@
+// main: base.scss
+
+// define some button mixins
+@mixin ghostButton() {
+  width: 200px;
+  padding: 7px;
+  display: inline-block;
+  color: #fff;
+  font-family: $handwrittenFont;
+  font-size: 1.5em;
+  font-weight: $bold;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  border: 2px solid #fff;
+  @include property('border-radius','4px');
+  cursor: pointer;
+}
+
+@mixin whiteButton() {
+  width: 200px;
+  padding: 7px;
+  display: inline-block;
+  color: $slate;
+  font-family: $handwrittenFont;
+  font-size: 1.5em;
+  font-weight: $bold;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  border: 2px solid #fff;
+  @include property('border-radius','4px');
+  background-color: #fff;
+  cursor: pointer;
+}
+
+@mixin dropDownLight() {
+  width: 240px;
+  padding: 7px 13px;
+  display: inline-block;
+  color: $slate;
+  font-family: $defaultFont;
+  font-size: 1em;
+  font-weight: $regular;
+  text-align: left;
+  text-decoration: none;
+  outline: none;
+  border: none;
+  @include property('border-radius', '0');
+  background-color: #fff;
+  background-image: url("images/dropdownArrow.png");
+  background-position: right center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  cursor: pointer;
+}
+
+@mixin dropDownDark() {
+  width: 240px;
+  padding: 7px 13px;
+  display: inline-block;
+  color: #fff;
+  font-family: $defaultFont;
+  font-size: 1em;
+  font-weight: $regular;
+  text-align: left;
+  text-decoration: none;
+  outline: none;
+  border: none;
+  @include property('border-radius', '0');
+  background-color: $slateBlue;
+  background-image: url("images/dropdownArrowLight.png");
+  background-position: right center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  cursor: pointer;
+}

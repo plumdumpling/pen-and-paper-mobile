@@ -1,0 +1,40 @@
+{
+	"attributes": {
+		"title": ["Intuition", "Intelligenz",
+							"Geschicklichkeit", "Stärke",
+							"Intriganz", "Sozial"],
+		"name": ["intuition", "intelligence",
+						"agility", "strength",
+						"scheming", "social"]
+	},
+
+
+	"skills": {
+		"title": ["Reflexe", "Medizin & Kräuterkunde", "Kulturen & Bräuche", "Technisches Verständnis",
+						"Spuren lesen", "Maschinen steuern", "Handwerkliche Begabung", "Körperbeherrschung",
+						"Schießen", "Werfen", "Nahkampf", "Fitness", "Schleichen", "Diebesgeschick",
+						"Lügen", "Verhandeln", "Charisma", "Fallen & Lügen erkennen"],
+		"name": ["reflex", "medicine", "culture", "technology",
+						"readtracks", "machine", "crafting", "bodycontrol",
+						"shoot", "throw", "melee", "fitness", "sneak", "thief",
+						"lie", "bargain", "charisma", "recognizetrap"],
+		"attributes": ["intuition-intuition", "intelligence-intelligence", "intelligence-intelligence",
+						"intelligence-intelligence", "intelligence-intelligence", "intelligence-agility", "agility-agility",
+						"agility-agility", "agility-agility", "agility-strength", "strength-strength", "strength-strength",
+						"agility-scheming", "agility-scheming", "scheming-scheming", "scheming-scheming", "social-social", "social-intuition"]
+	},
+
+
+	"characteristics": {
+		"advantages": {
+			"title": ["Schlösser knacken", "Tierfreund", "starkes Immunsystem", "Temperaturtoleranz", "Frohnatur", "Illusionist", "Gewissenlosigkeit"],
+			"name": ["lockpicking", "animallover", "immunesystem", "temperature", "cheerful", "illusionist", "unscrupulousness"],
+			"costs": [1, 1, 1, 1, 1, 2, 2]
+		},
+		"disadvantages": {
+			"title": ["Pyromane", "Analphabet", "Orientierungsschwäche", "Blutflüchter", "Nichtschwimmer", "Verfressenheit"],
+			"name": ["pyromaniac", "analphabet", "disorientation", "hemophobia", "nonswimmer", "hoggish"],
+			"costs": [1, 1, 1, 2, 2, 2]
+		}
+	}
+}

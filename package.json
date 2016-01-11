@@ -1,0 +1,26 @@
+{
+	"name": "pen-and-paper",
+	"version": "1.0.0",
+	"description": "Eine Webanwendung für Pen-&-Paper-Rollenspiele zur Erlangung des akademischen Grades Bachelor of Arts an der Hochschule Ulm.",
+	"author": "Leslie Zimmermann",
+	"main": "index.html",
+	"dependencies": {
+		"express": "4.x",
+		"express-session": "1.*",
+		"cookie-parser": "*",
+		"body-parser": "*",
+		"ejs": "2.x",
+		"nconf": "*",
+		"mysql": "*",
+		"bcryptjs": "*",
+		"socket.io": "*",
+		"shortid": "*"
+	},
+	"scripts": {
+		"start": "nodemon server.js"
+	},
+	"keywords": [
+		"pen", "paper", "rpg", "rollenspiel", "dm", "digital", "media", "hs ulm"
+	],
+	"private": true
+}

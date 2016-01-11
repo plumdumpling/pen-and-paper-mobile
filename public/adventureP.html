@@ -1,0 +1,1222 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>Pen &amp; Paper | v1.0.0</title>
+
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link rel="stylesheet" type="text/css" href="css/characterSheet.css">
+  <link rel="stylesheet" type="text/css" href="css/adventure.css">
+</head>
+<body class="preload player<% if(inBattle){ %> inBattle<% } %>">
+
+<div id="wrappers">
+  <div id="receiverOuter">
+    <a class="close" onClick="closeReceiver();"></a>
+    <h3>Du hast Gegenstände erhalten!</h3>
+    <div id="receiverInner">
+      <div id="itemsReceiver"></div>
+    </div>
+  </div>
+
+  <div id="enemiesWrapper" class="contentBlock">
+    <div id="battle"></div>
+  </div>
+
+  <div id="characterWrapper" class="contentBlock">
+    <img id="characterImage" src="<%= response.informations.imagepath %>" alt="<%= response.informations.name %>"/>
+
+    <div id="characterInfo">
+      <h3>Lebensanzeige</h3>
+      <div id="myHealth"><input id="health" type="number" min="0" max="10" value="<%= response.informations.health %>" readonly></input></div>
+
+      <h3>Geistige Konstitution</h3>
+      <div id="myConstitution"><input id="constitution" type="number" min="0" max="12" value="<%= response.informations.constitution %>" readonly></input></div>
+    </div>
+  </div>
+</div>
+
+<!-- minigames -->
+<div id="gameOuter" class="hide">
+  <div id="gameDescription"></div>
+  <div id="game">
+    <a id="startMinigame" class="hide" onClick="startMinigame();">Los geht's!</a>
+    <a id="closeMinigame" class="hide" onClick="closeMinigame();">OK</a>
+    <h2 id="countdown" class="hide"></h2>
+
+    <div id="performanceBar">
+      <% for(var i=0; i<6; i++){ %><div class="performance" data-value="<%= i %>"></div><% } %>
+    </div>
+    <div id="balanceBar"></div>
+    <div id="balanceBarControl"></div>
+    <div id="climbBar"></div>
+    <div id="left">
+      <!-- running svg -->
+      <svg class="running" width="44px" height="100%" viewBox="0 0 44 588.235">
+        <path fill="#FFFFFF" d="M21.101,41.999c11.597,0,21-9.404,21-21C42.101,9.404,32.697,0,21.101,0s-21,9.404-21,20.999 C0.101,32.595,9.504,41.999,21.101,41.999z"/>
+        <path fill="#FFFFFF" d="M28,60.235c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v31c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5V60.235 z"/>
+        <path fill="#FFFFFF" d="M28,122.235c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v31c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5 V122.235z"/>
+      	<path fill="#FFFFFF" d="M28,184.235c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v31c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5 V184.235z"/>
+        <path fill="#FFFFFF" d="M28,246.235c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v31c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5 V246.235z"/>
+      	<path fill="#FFFFFF" d="M28,308.235c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v31c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5 V308.235z"/>
+        <path fill="#FFFFFF" d="M28,370.235c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v31c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5 V370.235z"/>
+      	<path fill="#FFFFFF" d="M28,432.235c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v31c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5 V432.235z"/>
+      	<path fill="#FFFFFF" d="M21.5,487.735c-3.59,0-6.5,2.91-6.5,6.5v31c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5v-31 C28,490.646,25.09,487.735,21.5,487.735z"/>
+      	<path fill="#FFFFFF" d="M28,563.521v-5.285c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v4.283L0,547.483v18.713l22,22.039l22-22.039 v-18.713L28,563.521z"/>
+      </svg>
+      <!-- swimming svg left -->
+      <svg class="swimming" width="100%" height="100%" viewBox="0 0 194.101 583.5">
+        <path fill="#FFFFFF" d="M173.101,179.265c-11.597,0-21,9.404-21,20.999c0,11.596,9.403,21,21,21s21-9.404,21-21 C194.101,188.669,184.697,179.265,173.101,179.265z"/>
+        <path fill="#FFFFFF" d="M172.5,119.402c-3.59,0-6.5,2.91-6.5,6.5V156.5c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5v-30.598 C179,122.312,176.09,119.402,172.5,119.402z"/>
+      	<path fill="#FFFFFF" d="M166,64.747v0.168c0,0.187,0,0.305,0,0.319v30.069c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5V65.605 c1-0.141,0-0.373,0-0.69v-0.252c0-3.576-1.921-5.163-5.491-5.163c-0.015,0-0.028,0-0.044,0C169.876,59.5,166,61.157,166,64.747z"/>
+        <path fill="#FFFFFF" d="M159.434,39.024c1.228,2,3.361,3.102,5.547,3.102c1.158,0,2.333-0.311,3.393-0.961 c3.061-1.878,4.019-5.88,2.141-8.939c-5.938-9.676-14.308-17.321-24.879-22.724c-3.197-1.635-7.111-0.366-8.746,2.83 c-1.633,3.196-0.366,7.112,2.83,8.746C148.131,25.377,154.765,31.415,159.434,39.024z"/>
+        <path fill="#FFFFFF" d="M114.082,0.703C109.621,0.236,104.893,0,100.029,0c-6.276,0-12.275,0.304-17.828,0.902 c-3.57,0.386-6.151,3.591-5.766,7.16c0.359,3.332,3.177,5.804,6.454,5.804c0.232,0,0.468-0.013,0.705-0.038 C88.688,13.278,94.217,13,100.029,13c4.414,0,8.687,0.213,12.7,0.633c3.573,0.381,6.768-2.218,7.142-5.789 C120.244,4.273,117.652,1.077,114.082,0.703z"/>
+        <path fill="#FFFFFF" d="M50.685,9.174c-11.04,5.256-19.537,12.86-25.256,22.602c-1.817,3.096-0.781,7.079,2.314,8.896 c1.034,0.607,2.167,0.896,3.285,0.896c2.229,0,4.401-1.148,5.611-3.21c4.44-7.563,10.862-13.27,19.633-17.445 c3.241-1.544,4.618-5.422,3.075-8.663C57.805,9.009,53.924,7.635,50.685,9.174z"/>
+      	<path fill="#FFFFFF" d="M21.5,101.556c3.59,0,6.5-2.91,6.5-6.5V77.294c0-3.947,0.545-8.197,0.866-12.533 c0.265-3.58-2.172-6.696-5.752-6.962c-3.584-0.263-7.072,2.423-7.337,6.003C15.424,68.558,15,73.096,15,77.293v17.763 C15,98.646,17.91,101.556,21.5,101.556z"/>
+      	<path fill="#FFFFFF" d="M21.5,162.991c3.59,0,6.5-2.91,6.5-6.5v-30.703c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v30.703 C15,160.081,17.91,162.991,21.5,162.991z"/>
+        <path fill="#FFFFFF" d="M21.5,224.382c3.59,0,6.5-2.91,6.5-6.5v-30.692c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v30.692 C15,221.472,17.91,224.382,21.5,224.382z"/>
+        <path fill="#FFFFFF" d="M21.5,285.757c3.59,0,6.5-2.91,6.5-6.5V248.57c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v30.687 C15,282.847,17.91,285.757,21.5,285.757z"/>
+        <path fill="#FFFFFF" d="M21.5,347.104c3.59,0,6.5-2.91,6.5-6.5v-30.685c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v30.685 C15,344.193,17.91,347.104,21.5,347.104z"/>
+      	<path fill="#FFFFFF" d="M21.5,408.478c3.59,0,6.5-2.91,6.5-6.5v-30.689c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v30.689 C15,405.567,17.91,408.478,21.5,408.478z"/>
+        <path fill="#FFFFFF" d="M21.5,469.87c3.59,0,6.5-2.91,6.5-6.5v-30.7c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v30.7 C15,466.96,17.91,469.87,21.5,469.87z"/>
+      	<path fill="#FFFFFF" d="M21.5,531.322c3.59,0,6.5-2.91,6.5-6.5v-30.748c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v30.748 C15,528.412,17.91,531.322,21.5,531.322z"/>
+      	<path fill="#FFFFFF" d="M28,553.5c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v4.283L0,542.748v18.713L22,583.5l22-22.039v-18.713 l-16,16.037V553.5z"/>
+      </svg>
+      <!-- swimming recognizer divs -->
+      <div class="up" id="upLeft"></div>
+      <div class="side" id="sideLeft"></div>
+      <div class="down" id="downLeft"></div>
+    </div><!--
+    --><div id="right">
+      <!-- running svg -->
+      <svg class="running" width="44px" height="100%" viewBox="0 0 44 588.235">
+        <path fill="#FFFFFF" d="M21.101,41.999c11.597,0,21-9.404,21-21C42.101,9.404,32.697,0,21.101,0s-21,9.404-21,20.999 C0.101,32.595,9.504,41.999,21.101,41.999z"/>
+        <path fill="#FFFFFF" d="M28,60.235c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v31c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5V60.235 z"/>
+        <path fill="#FFFFFF" d="M28,122.235c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v31c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5 V122.235z"/>
+      	<path fill="#FFFFFF" d="M28,184.235c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v31c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5 V184.235z"/>
+        <path fill="#FFFFFF" d="M28,246.235c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v31c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5 V246.235z"/>
+      	<path fill="#FFFFFF" d="M28,308.235c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v31c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5 V308.235z"/>
+        <path fill="#FFFFFF" d="M28,370.235c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v31c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5 V370.235z"/>
+      	<path fill="#FFFFFF" d="M28,432.235c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v31c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5 V432.235z"/>
+      	<path fill="#FFFFFF" d="M21.5,487.735c-3.59,0-6.5,2.91-6.5,6.5v31c0,3.59,2.91,6.5,6.5,6.5s6.5-2.91,6.5-6.5v-31 C28,490.646,25.09,487.735,21.5,487.735z"/>
+      	<path fill="#FFFFFF" d="M28,563.521v-5.285c0-3.59-2.91-6.5-6.5-6.5s-6.5,2.91-6.5,6.5v4.283L0,547.483v18.713l22,22.039l22-22.039 v-18.713L28,563.521z"/>
+      </svg>
+      <!-- swimming svg right -->
+      <svg class="swimming" width="100%" height="100%" viewBox="0 0 194.101 583.5">
+        <path fill="#FFFFFF" d="M21,179.265c11.597,0,21,9.404,21,20.999c0,11.596-9.403,21-21,21s-21-9.404-21-21 C0,188.669,9.403,179.265,21,179.265z"/>
+        <path fill="#FFFFFF" d="M21.5,119.402c3.59,0,6.5,2.91,6.5,6.5V156.5c0,3.59-2.91,6.5-6.5,6.5s-6.5-2.91-6.5-6.5v-30.598 C15,122.312,17.91,119.402,21.5,119.402z"/>
+      	<path fill="#FFFFFF" d="M28,64.747v0.168c0,0.187,0,0.305,0,0.319v30.069c0,3.59-2.91,6.5-6.5,6.5s-6.5-2.91-6.5-6.5V65.605 c-1-0.141,0-0.373,0-0.69v-0.252c0-3.576,2.021-5.163,5.592-5.163c0.015,0,0.028,0,0.044,0C24.225,59.5,28,61.157,28,64.747z"/>
+        <path fill="#FFFFFF" d="M34.667,39.024c-1.228,2-3.361,3.102-5.547,3.102c-1.158,0-2.333-0.311-3.393-0.961 c-3.061-1.878-4.019-5.88-2.141-8.939c5.938-9.676,14.308-17.321,24.879-22.724c3.197-1.635,7.111-0.366,8.746,2.83 c1.633,3.196,0.366,7.112-2.83,8.746C45.97,25.377,39.336,31.415,34.667,39.024z"/>
+        <path fill="#FFFFFF" d="M80.019,0.703C84.479,0.236,89.208,0,94.071,0c6.276,0,12.275,0.304,17.828,0.902 c3.57,0.386,6.151,3.591,5.766,7.16c-0.359,3.332-3.177,5.804-6.454,5.804c-0.232,0-0.468-0.013-0.705-0.038 C105.413,13.278,99.884,13,94.071,13c-4.414,0-8.687,0.213-12.7,0.633c-3.573,0.381-6.768-2.218-7.142-5.789 C73.856,4.273,76.448,1.077,80.019,0.703z"/>
+        <path fill="#FFFFFF" d="M143.416,9.174c11.04,5.256,19.537,12.86,25.256,22.602c1.817,3.096,0.781,7.079-2.314,8.896 c-1.034,0.607-2.167,0.896-3.285,0.896c-2.229,0-4.401-1.148-5.611-3.21c-4.44-7.563-10.862-13.27-19.633-17.445 c-3.241-1.544-4.618-5.422-3.075-8.663C136.296,9.009,140.177,7.635,143.416,9.174z"/>
+        <path fill="#FFFFFF" d="M172.5,101.556c-3.59,0-6.5-2.91-6.5-6.5V77.294c0-3.947-0.495-8.197-0.816-12.533 c-0.265-3.58,2.198-6.696,5.778-6.962c3.584-0.263,7.034,2.423,7.299,6.003c0.352,4.756,0.739,9.294,0.739,13.491v17.763 C179,98.646,176.09,101.556,172.5,101.556z"/>
+      	<path fill="#FFFFFF" d="M172.5,162.991c-3.59,0-6.5-2.91-6.5-6.5v-30.703c0-3.59,2.91-6.5,6.5-6.5s6.5,2.91,6.5,6.5v30.703 C179,160.081,176.09,162.991,172.5,162.991z"/>
+        <path fill="#FFFFFF" d="M172.5,224.382c-3.59,0-6.5-2.91-6.5-6.5v-30.692c0-3.59,2.91-6.5,6.5-6.5s6.5,2.91,6.5,6.5v30.692 C179,221.472,176.09,224.382,172.5,224.382z"/>
+      	<path fill="#FFFFFF" d="M172.5,285.757c-3.59,0-6.5-2.91-6.5-6.5V248.57c0-3.59,2.91-6.5,6.5-6.5s6.5,2.91,6.5,6.5v30.687 C179,282.847,176.09,285.757,172.5,285.757z"/>
+        <path fill="#FFFFFF" d="M172.5,347.104c-3.59,0-6.5-2.91-6.5-6.5v-30.685c0-3.59,2.91-6.5,6.5-6.5s6.5,2.91,6.5,6.5v30.685 C179,344.193,176.09,347.104,172.5,347.104z"/>
+      	<path fill="#FFFFFF" d="M172.5,408.478c-3.59,0-6.5-2.91-6.5-6.5v-30.689c0-3.59,2.91-6.5,6.5-6.5s6.5,2.91,6.5,6.5v30.689 C179,405.567,176.09,408.478,172.5,408.478z"/>
+        <path fill="#FFFFFF" d="M172.5,469.87c-3.59,0-6.5-2.91-6.5-6.5v-30.7c0-3.59,2.91-6.5,6.5-6.5s6.5,2.91,6.5,6.5v30.7 C179,466.96,176.09,469.87,172.5,469.87z"/>
+      	<path fill="#FFFFFF" d="M172.5,531.322c-3.59,0-6.5-2.91-6.5-6.5v-30.748c0-3.59,2.91-6.5,6.5-6.5s6.5,2.91,6.5,6.5v30.748 C179,528.412,176.09,531.322,172.5,531.322z"/>
+      	<path fill="#FFFFFF" d="M166,553.5c0-3.59,2.91-6.5,6.5-6.5s6.5,2.91,6.5,6.5v4.283l15-15.035v18.713L172,583.5l-22-22.039v-18.713 l16,16.037V553.5z"/>
+      </svg>
+      <!-- swimming recognizer divs -->
+      <div class="up" id="upRight"></div>
+      <div class="side" id="sideRight"></div>
+      <div class="down" id="downRight"></div>
+    </div>
+  </div>
+</div>
+
+<!-- sidebars -->
+<div id="sidebar">
+  <nav id="buttons">
+    <button data-content="settings"></button>
+      <svg width="20px" height="6px" class="dottedLine"><line x1="0" x2="20" y1="2" y2="2" stroke="#4a5a64" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/></svg>
+    <button data-content="inventory"></button>
+      <svg width="20px" height="6px" class="dottedLine"><line x1="0" x2="20" y1="2" y2="2" stroke="#14c288" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/></svg>
+    <button data-content="character"></button>
+      <svg width="20px" height="6px" class="dottedLine"><line x1="0" x2="20" y1="2" y2="2" stroke="#71d479" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/></svg>
+    <button data-content="skillTrials"></button>
+      <svg width="20px" height="6px" class="dottedLine"><line x1="0" x2="20" y1="2" y2="2" stroke="#b1e06e" stroke-width="3" stroke-linecap="round" stroke-dasharray="6, 8"/></svg>
+  </nav>
+
+  <div id="sidebarContent">
+    <% include sidebars/settings %>
+    <% include sidebars/inventory %>
+    <% include sidebars/character %>
+    <% include sidebars/skillTrials %>
+  </div>
+</div>
+
+<!-- pop-ups -->
+<div class="popup hide"><div id="diceBox"></div></div>
+
+<div id="bonus" class="hide"><span id="bonusValue"></span></div>
+
+<% include popupAndNotification %>
+
+
+
+<!-- JavaScript - libraries and modules  -->
+<script src="js/jquery-1.11.2.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/draggabilly.pkgd.min.js"></script>
+<script src="js/hammer.min.js"></script>
+
+<!-- JavaScript - custom scripts  -->
+<script type="text/javascript" src="js/basic.js"></script>
+<script type="text/javascript" src="js/player.js"></script>
+<script type="text/javascript" src="js/tutorial.js"></script>
+<script type="text/javascript">
+var socket = io.connect('http://141.59.164.11:3000');
+var roomID = '<%= roomID %>';
+var inBattle = <%= inBattle %>;
+
+var character = <%- JSON.stringify(response.informations) %>;
+var attributes = <%- JSON.stringify(attributes) %>;
+var skills = <%- JSON.stringify(skills) %>;
+var characteristics = <%- JSON.stringify(characteristics) %>;
+
+socket.emit('connectPlayer', { username:'<%= username %>', roomID:roomID, sessionID:'<%= sessionID %>' });
+
+/* ERROR HANDLING */
+socket.on('error', function (){ popup('Hoppla, da lief was schief!'); });
+
+
+/* LOAD SAVEGAME */
+$(document).ready(function (){
+  <% if(tutorial.tutorialMode=='1'){ %>startTutorialNow();<% } %>
+  <% if(inBattle){ %>
+  // display enemies
+  receiveEnemies(<%- JSON.stringify(enemies.content) %>, <%- JSON.stringify(enemies.data) %>);
+  <% } %>
+});
+
+
+/* SIDEBAR */
+$(document).on('click', '#sidebar #buttons button', function (event){
+  var waitForContent = false;
+  if(!$('#sidebar').hasClass('open')){
+    // request content from server if not done yet
+    if($('#'+$(event.target).attr('data-content')).attr('data-requested') !== 'true'){
+      if($(event.target).attr('data-content') == 'character' || $(event.target).attr('data-content') == 'skillTrials'){
+        $('#character').attr('data-requested', 'true');
+        $('#skillTrials').attr('data-requested', 'true');
+        requestContent($(event.target).attr('data-content'));
+        waitForContent = true;
+      }
+    }
+
+    // mark button as clicked
+    $(event.target).addClass('active');
+  }
+
+  // show or hide sidebar
+  if(!waitForContent) toggleSidebar($(event.target).attr('data-content'));
+});
+
+function requestContent (contentType){
+  $.post('/selectPlayerContent', function (response){
+    console.log('received data');
+    if(!response.err){
+      // init attribute trials
+      var attributeValues = [];
+      <% for(var i=0; i<attributes.name.length; i++){ %>
+      attributeValues.push(response.character.attributeValues.<%= attributes.name[i] %>);
+      <% } %>
+      for(var i=0; i<(attributes.title.length/2); i++){
+        var div = document.createElement('div');
+        div.innerHTML = '<div class="attribute" id="'+attributes.name[i*2]+'" data-title="'+attributes.title[i*2]+'" data-value="'+attributeValues[i*2]+'"></div><!-- --><div class="attribute" id="'+attributes.name[i*2+1]+'" data-title="'+attributes.title[i*2+1]+'" data-value="'+attributeValues[i*2+1]+'"></div>';
+        // add attributes group divs to view
+        $('#diceSelectionA').append(div.innerHTML);
+        // add images, text and value bar
+        $('#'+attributes.name[i*2]).append('<div class="images"><img src="/images/charactersheet/'+attributes.name[i*2]+'_s.png"/></div><h2>'+attributes.title[i*2]+' ('+attributeValues[i*2]+')</h2><div class="valueBar"></div>');
+        $('#'+attributes.name[i*2+1]).append('<div class="images"><img src="/images/charactersheet/'+attributes.name[i*2+1]+'_s.png"/></div><h2>'+attributes.title[i*2+1]+' ('+attributeValues[i*2+1]+')</h2><div class="valueBar"></div>');
+        // width of value bar
+        $('#'+attributes.name[i*2]+' .valueBar').css('width', (parseInt($('#'+attributes.name[i*2]).attr('data-value'))*16.6)+'%');
+        $('#'+attributes.name[i*2+1]+' .valueBar').css('width', (parseInt($('#'+attributes.name[i*2+1]).attr('data-value'))*16.6)+'%');
+      }
+
+      // init skill trials
+      var skillValues = [];
+      <% for(var i=0; i<skills.name.length; i++){ %>
+      skillValues.push(response.character.skillValues.<%= skills.name[i] %>);
+      <% } %>
+      for(var i=0; i<skills.title.length; i++){
+        var div = document.createElement('div');
+        div.innerHTML = '<div class="skill" id="'+skills.name[i]+'" data-attributes="'+skills.attributes[i]+'" data-title="'+skills.title[i]+'" data-value="'+skillValues[i]+'"></div>';
+        // add attributes group divs to view
+        $('#diceSelectionS').append(div.innerHTML);
+        // add image div, text and value bar
+        $('#'+skills.name[i]).append('<div class="images"></div><h2>'+skills.title[i]+' ('+skillValues[i]+')</h2><div class="valueBar"></div>');
+        // width of value bar
+        $('#'+skills.name[i]+' .valueBar').css('width', (parseInt($('#'+skills.name[i]).attr('data-value'))*6.25)+'%');
+      }
+      // add images
+      var att = [];
+      $('#diceSelectionS .skill').each(function (){
+        att = $(this).attr('data-attributes').split('-');
+        $(this).find('.images').eq(0).html('<img src="/images/charactersheet/'+att[0]+'_s.png"/><img src="/images/charactersheet/'+att[1]+'_s.png"/>');
+      });
+
+      // fill character sheet with received values
+      fillCharacterSheet(response.character);
+      // add attribute images to skills
+      $('.skillInner').each(function (){
+        att = $(this).attr('data-attributes').split('-');
+        $(this).find('.images').eq(0).html('<img src="/images/charactersheet/'+att[0]+'_s.png"/><img src="/images/charactersheet/'+att[1]+'_s.png"/>');
+      });
+
+      // show sidebar
+      toggleSidebar(contentType);
+    }
+    else{
+      popup('Hoppla, da lief was schief!', 'Bitte versuche es erneut und lade die Seite gegebenenfalls neu.');
+    }
+  }).fail(function (){
+    popup('Hoppla, da lief was schief!', 'Bitte versuche es erneut und lade die Seite gegebenenfalls neu.');
+  });
+}
+
+function fillCharacterSheet (character){
+  var inputCount;
+  /* ATTRIBUTES */
+  <% for (var i=0; i<attributes.name.length; i++){ %>
+  // insert value for attribute <%= attributes.name[i] %> of character
+  inputCount = 0;
+  $('input[type=checkbox][name=<%= attributes.name[i] %>]').each(function (){
+    // check and enable as many checkboxes as the value of the attribute says
+    if(inputCount<character.attributeValues.<%= attributes.name[i] %>){
+      $(this).prop('checked', true);
+      $(this).removeClass('disabled');
+      <% if(i===1){ %>if(inputCount>=3 && $('input[type=checkbox][name=<%= attributes.name[0] %>]:checked').length<3) removeAttrSlot('g1', 'a1');<% } %>
+      <% if(i===3){ %>if(inputCount>=3 && $('input[type=checkbox][name=<%= attributes.name[2] %>]:checked').length<3) removeAttrSlot('g2', 'a1');<% } %>
+      <% if(i===5){ %>if(inputCount>=3 && $('input[type=checkbox][name=<%= attributes.name[4] %>]:checked').length<3) removeAttrSlot('g3', 'a1');<% } %>
+      inputCount++;
+    }
+    else {
+      <% if(i===1){ %>if(character.attributeValues.<%= attributes.name[i] %><3 && $('input[type=checkbox][name=<%= attributes.name[0] %>]:checked').length>3){
+        for (var i=0; i<($('input[type=checkbox][name=<%= attributes.name[0] %>]:checked').length-3); i++){
+          removeAttrSlot('g1', 'a2');
+        }
+      }<% } %>
+      <% if(i===3){ %>if(character.attributeValues.<%= attributes.name[i] %><3 && $('input[type=checkbox][name=<%= attributes.name[2] %>]:checked').length>3){
+        for (var i=0; i<($('input[type=checkbox][name=<%= attributes.name[2] %>]:checked').length-3); i++){
+          removeAttrSlot('g2', 'a2');
+        }
+      }<% } %>
+      <% if(i===5){ %>if(character.attributeValues.<%= attributes.name[i] %><3 && $('input[type=checkbox][name=<%= attributes.name[4] %>]:checked').length>3){
+        for (var i=0; i<($('input[type=checkbox][name=<%= attributes.name[4] %>]:checked').length-3); i++){
+          removeAttrSlot('g3', 'a2');
+        }
+      }<% } %>
+      return false;
+    }
+  });
+  <% } %>
+
+  /* SKILLS */
+  <% for (var i=0; i<skills.name.length; i++){ %>
+  // insert value for skill <%= skills.name[i] %>
+  inputCount = 0;
+  $('.skillInner input[type=checkbox][name=<%= skills.name[i] %>]').each(function (){
+    // check if skill is set
+    if(character.skillValues.<%= skills.name[i] %> > 0) $(this).parent().addClass('checked');
+    // check as many checkboxes as the value of the skill says
+    if(inputCount<character.skillValues.<%= skills.name[i] %>){
+      $(this).prop('checked', true);
+      inputCount++;
+    }
+    else return false;
+  });
+  <% } %>
+
+  /* CHARACTERISTICS */
+  // advantages
+  <% for(var i=0; i<characteristics.advantages.name.length; i++){ %>
+  // check checkbox for advantage <%= characteristics.advantages.name[i] %>
+  if(character.advanValues.<%= characteristics.advantages.name[i] %>){
+    $('#cForm .advantages p input[type=checkbox][name=<%= characteristics.advantages.name[i] %>]').prop('checked', true);
+    $('#cForm .advantages p input[type=checkbox][name=<%= characteristics.advantages.name[i] %>]').parent().addClass('checked');
+  }
+  <% } %>
+    // disadvantages
+  <% for(var i=0; i<characteristics.disadvantages.name.length; i++){ %>
+  // check checkbox for disadvantage <%= characteristics.disadvantages.name[i] %>
+  if(character.disadvanValues.<%= characteristics.disadvantages.name[i] %>){
+    $('#cForm .disadvantages p input[type=checkbox][name=<%= characteristics.disadvantages.name[i] %>]').prop('checked', true);
+    $('#cForm .disadvantages p input[type=checkbox][name=<%= characteristics.disadvantages.name[i] %>]').parent().addClass('checked');
+  }
+  <% } %>
+}
+
+function removeAttrSlot (group, classname){
+  // checkboxes of the opposite attribute
+  $('.'+group+' .'+classname+' input[type=checkbox]').each(function (){
+    // disable the last enabled checkbox, if it's not checked
+    if(!$(this).prop('checked') && $(this).nextAll('input[type=checkbox]').eq(0).hasClass('disabled')){
+      $(this).addClass('disabled');
+      return false;
+    }
+  });
+}
+
+
+/* SAVE INVENTORY */
+function saveInventory (){
+  console.log('save inventory');
+  // collect item ids from inventory
+  var id, inventoryIDs = [];
+  $('#sidebar .slot').each(function (){
+    if($(this).children().length >0) id = $(this).children().attr('id').replace('item-', '');
+    else id = 0;
+    inventoryIDs.push(id);
+  });
+
+  // make string from array
+  var inventoryData = inventoryIDs.join();
+
+  $.ajax({
+    url: '/saveInventory',
+    type: 'PUT',
+    data: {inventoryData:inventoryData}
+  })
+  .done(function(response) {
+    if(response.err){
+      popup('Hoppla, da lief was schief!', 'Da ist wohl der Rucksack heruntergepurzelt und Gegenstände verloren gegangen. Bitte sortiere die Gegenstände neu ein und lade die Seite gegebenenfalls neu.');
+    }
+  })
+  .fail(function() {
+    popup('Hoppla, da lief was schief!', 'Da ist wohl der Rucksack heruntergepurzelt und Gegenstände verloren gegangen. Bitte sortiere die Gegenstände neu ein und lade die Seite gegebenenfalls neu.');
+  });
+}
+
+
+/* GAMEMASTER CONNECTION */
+var gamemasterConnected = true, adventurePaused = false;
+socket.on('gamemasterDisconnected', function (){
+  gamemasterConnected = false;
+  setTimeout(function (){
+    // pause adventure if gamemaster disconnected for more than 5 seconds
+    if(!gamemasterConnected) {
+      adventurePaused = true;
+      console.log('waiting for gamemaster to reconnect');
+    }
+  }, 5000);
+});
+socket.on('gamemasterConnected', function (){
+  gamemasterConnected = true;
+  if(adventurePaused){
+    adventurePaused = false;
+    console.log('gamemaster reconnected');
+  }
+});
+
+
+/* RECEIVING DATA FROM GAMEMASTER */
+socket.on('receiveContent', function (data){
+  console.log('received content');
+  console.log(data);
+  // check received data
+  if(data.content || data.game){
+    switch (data.contentType.toLowerCase()) {
+      case 'items':
+        receiveItems(data.content);
+        break;
+      case 'enemies':
+        receiveEnemies(data.content, data.enemiesData);
+        break;
+      case 'games':
+        if(!minigameRunning) receiveMinigame(data.game);
+        break;
+    }
+    socket.emit('receiveContentCallback', { roomID:roomID, err:false });
+  }
+  else{
+    socket.emit('receiveContentCallback', { roomID:roomID, err:'no data received' });
+  }
+});
+
+function receiveItems(items) {
+  console.log(items);
+
+  for (var i=0; i<items.length; i++) {
+    var div = document.createElement('div');
+    div.className = 'draggable';
+
+    if(items[i].userID) div.id = 'item-u'+items[i].id;
+    else div.id = 'item-'+items[i].id;
+
+    div.innerHTML = '<h3>'+items[i].name+'</h3>';
+    document.getElementById('itemsReceiver').appendChild(div);
+
+    // configure items receiver width
+    $('#itemsReceiver').css('width', ($('#itemsReceiver .draggable').length*130)+'px');
+  }
+  // show receiver
+  $('#receiverOuter').addClass('visible');
+
+  // initalize received items as draggables
+  Array.prototype.slice.call(document.querySelectorAll('.draggable')).forEach(function (elem){
+    this.draggie = new Draggabilly(elem, {
+      containment: document.body
+    });
+
+    // some event listeners for draggables
+    this.draggie.on('dragStart', startDragging);
+    this.draggie.on('dragMove', moveDragging);
+    this.draggie.on('dragEnd', endDragging);
+
+    // custom options for draggables
+    this.draggie.customOptions = {
+      moveBack: true,
+      scrollArea: '#sidebar'
+    }
+  });
+}
+
+function closeReceiver (){
+  $('#receiverOuter').removeClass('visible');
+  $('#receiverOuter').addClass('hidden');
+  setTimeout(function (){
+    $('#receiverOuter').removeClass('hidden');
+  }, 1000);
+}
+
+function receiveEnemies(content, enemiesData) {
+  $('body').addClass('inBattle');
+  $('#enemiesWrapper').addClass('visible');
+  // fill battle div with enemie
+  for (var n=0; n<enemiesData.length; n++){
+    // check if player received this enemie
+    var displayEnemie = false;
+    var receivers = enemiesData[n].receivers.split(',');
+    for(var i=0; i<receivers.length; i++){
+      if(receivers[i]==='<%= username %>') displayEnemie = true;
+    }
+    // display enemie if player received it before
+    if(displayEnemie){
+      var div = document.createElement('div');
+      // check if enemie is still dead
+      if(enemiesData[n].hp <= 0) div.className = 'enemies dead';
+      else div.className = 'enemies';
+
+      div.id = enemiesData[n].uniqueID;
+      // get enemie id
+      var enemieID = enemiesData[n].id;
+      if(enemieID.indexOf('u') > -1) $(div).attr('data-id', 'enemies-u'+enemieID.split('u')[1]);
+      else $(div).attr('data-id', 'enemies-'+enemieID);
+
+
+      // enemie image and name
+      var textDiv = document.createElement('div');
+      for(var m=0; m<content.length; m++){
+        // get informations for enemie
+        if(content[m].id===enemieID || 'u'+content[m].id===enemieID){
+          $(div).append('<img src="'+content[m].imagepath+'"/>');
+          $(textDiv).append('<h4>'+content[m].name+'</h4>');
+        }
+      }
+      $(textDiv).addClass('text');
+      $(div).append(textDiv);
+
+      // add enemie's hp, level and strength to div
+      var enemieInfoDiv = document.createElement('div');
+      $(enemieInfoDiv).append('<p>HP</p><input type="number" name="hp" value="'+enemiesData[n].hp+'" style="width:'+enemiesData[n].hp+'0px;" readonly/>');
+      $(enemieInfoDiv).append('<p>Level</p><input type="number" name="level" value="'+enemiesData[n].level+'" readonly/>');
+      $(enemieInfoDiv).append('<p>Strength</p><input type="number" name="strength" value="'+enemiesData[n].strength+'" readonly/>');
+      $(enemieInfoDiv).append('<br class="clear"/>');
+      $(enemieInfoDiv).addClass('info');
+      $(div).append(enemieInfoDiv);
+
+      // display enemie in battle div
+      document.getElementById('battle').appendChild(div);
+    }
+  }
+}
+
+/* MINIGAMES */
+var minigameRunning = false;
+
+function receiveMinigame (game){
+  console.log('received game '+game.id);
+  // test if device has an accelerometer for games where it's needed
+  if(window.DeviceMotionEvent || parseInt(game.id)>=5){
+    // load minigame script
+    $.getScript('/js/minigameScripts/game'+game.id+'.js').done(function (script, textStatus){
+      console.log('loaded script');
+      // show game
+      $('#startMinigame').removeClass('hide');
+      showGame(game);
+    }).fail(function (jqxhr, settings, exception){
+      console.log('loading script failed');
+    });
+  }
+  else{
+    notification('Der Spielleiter hat dir eine Prüfung gesendet, doch leider unterstützt dein Gerät die benötigten Funktionen dafür nicht.');
+  }
+}
+
+function showGame (game){
+  minigameRunning = true;
+  // set informations and variables
+  $('#gameDescription').append('<h1>'+game.title+'</h1><p class="description">'+game.description+'</p>');
+  $('#game').attr('data-id', game.id);
+  // show on screen
+  $('#gameOuter').removeClass('hide');
+  $('#gameOuter').addClass('visible');
+}
+
+document.getElementById('gameOuter').ontouchmove = function(event){
+  event.preventDefault();
+}
+
+function startMinigame (){
+  $('#startMinigame').addClass('hide');
+  // start countdown
+  $('#countdown').html('3');
+  $('#countdown').removeClass('hide');
+  setTimeout(function (){
+    $('#countdown').html('2');
+    setTimeout(function (){
+      $('#countdown').html('1');
+      setTimeout(function (){
+        $('#countdown').html('LOS');
+        setTimeout(function (){
+          $('#countdown').addClass('hide');
+          $('#gameDescription p').addClass('hide');
+          startGame();
+        }, 1000);
+      }, 1000);
+    }, 1000);
+  }, 1000);
+}
+
+function stopGame (success){
+  // show result of the minigame to the player
+  $('#gameDescription').empty();
+  if(success) $('#gameDescription').append('<h1>Glückwunsch!</h1><p>Du hast die Probe bestanden.</p>');
+  else $('#gameDescription').append('<h1>Schade.</h1><p>Du hast die Probe leider nicht bestanden.</p>');
+  $('#closeMinigame').removeClass('hide');
+}
+
+function closeMinigame (){
+  minigameRunning = false;
+  // hide minigame screen
+  $('#gameOuter').removeClass('visible');
+  $('#gameOuter').addClass('hide');
+  // reset minigame div
+  $('#gameDescription').empty();
+  $('#closeMinigame').addClass('hide');
+}
+
+
+/* RECEIVE OPTIONS FROM GAMEMASTER */
+socket.on('receiveOptions', function (data){
+  console.log('received options');
+  console.log(data);
+  // check received data
+  if(data.options){
+    // check for received character points
+    if(character.cp < data.options.cp) notification('Du hast '+(data.options.cp-character.cp)+' Charakterpunkte erhalten.');
+
+    // check for new injuries
+    if(character.minorInjury < data.options.minorInjury){
+      if((data.options.minorInjury-character.minorInjury)<=1) notification('Du hast dir eine kleine Verletzung zugezogen.');
+      else notification('Du hast dir '+(data.options.minorInjury-character.minorInjury)+' kleine Verletzungen zugezogen.');
+    }
+    if(character.middleInjury < data.options.middleInjury){
+      if((data.options.middleInjury-character.middleInjury)<=1) notification('Du hast dir eine Verletzung zugezogen.');
+      else notification('Du hast dir '+(data.options.middleInjury-character.middleInjury)+' Verletzungen zugezogen.');
+    }
+    if(character.severeInjury < data.options.severeInjury){
+      if((data.options.severeInjury-character.severeInjury)<=1) notification('Du hast dir eine schwere Verletzung zugezogen.');
+      else notification('Du hast dir '+(data.options.severeInjury-character.severeInjury)+' schwere Verletzungen zugezogen.');
+    }
+
+    // check for cured injuries
+    if(character.minorInjury > data.options.minorInjury){
+      if((character.minorInjury-data.options.minorInjury)<=1) notification('Deine kleine Verletzung ist geheilt.');
+      else notification((character.minorInjury-data.options.minorInjury)+' kleine Verletzungen sind geheilt.');
+    }
+    if(character.middleInjury > data.options.middleInjury){
+      if((character.middleInjury-data.options.middleInjury)<=1) notification('Deine Verletzung ist geheilt.');
+      else notification((character.middleInjury-data.options.middleInjury)+' Verletzungen sind geheilt.');
+    }
+    if(character.severeInjury > data.options.severeInjury){
+      if((character.severeInjury-data.options.severeInjury)<=1) notification('Deine schwere Verletzung ist geheilt.');
+      else notification((character.severeInjury-data.options.severeInjury)+' schwere Verletzungen sind geheilt.');
+    }
+
+    // check for changes in constitution
+    if(character.constitution < data.options.constitution) notification('Deine geistige Konstitution hat sich um '+(data.options.constitution-character.constitution)+' verbessert.');
+    if(character.constitution > data.options.constitution) notification('Deine geistige Konstitution hat sich um '+(character.constitution-data.options.constitution)+' verschlechtert.');
+
+    // save changes in array
+    character.cp = data.options.cp
+    character.minorInjury = data.options.minorInjury;
+    character.middleInjury = data.options.middleInjury;
+    character.severeInjury = data.options.severeInjury;
+    character.health = data.options.health;
+    character.constitution = data.options.constitution;
+
+    // display changes
+    $('input#health').attr('value', data.options.health);
+    $('input#constitution').attr('value', data.options.constitution);
+  }
+});
+
+/* EDIT CHARACTER */
+$('#editCharacter').on('click', function(){
+  window.location.href = "http://141.59.164.11:3000/edit/characters/"+character.id+"/"+roomID;
+});
+
+
+/* SCENE IMAGE */
+socket.emit('requestSceneImage', { roomID:roomID });
+
+socket.on('receiveSceneImage', function (data){
+  if(data.imagepath){
+    // update scene image
+    document.getElementById('wrappers').style.backgroundImage = data.imagepath;
+  }
+});
+
+
+/* CHANGE CHARACTER VALUES */
+function characterInjuries (addInjury, enemie, hitSize){
+  var change = hitSize;
+  if(!addInjury) change = -change;
+
+  // update character variables
+  switch (hitSize) {
+    case 1:
+      character.minorInjury += change;
+      break;
+    case 2:
+      character.middleInjury += change;
+      break;
+    case 3:
+      character.severeInjury += change;
+      break;
+  }
+  character.health -= change;
+
+  // save in database
+  $.post('/saveCharacterInfo', { optiony:character }, function (response){
+    if(!response.err){
+      // update view
+      $('#health').val(character.health);
+
+      var injury = '';
+      switch (data.hit) {
+        case 1:
+          if(enemie) injury = 'leicht ';
+          else injury = 'leichte ';
+          break;
+        case 3:
+          if(enemie) injury = 'stark ';
+          else injury = 'schwere ';
+          break;
+      }
+      if(enemie) notification($('#'+data.enemieID+' .text h4').html()+' hat dich '+injury+'verletzt.');
+      else notification('Du hast dir eine '+injury+'Verletzung zugezogen.');
+    }
+    else{
+      popup('Hoppla, da lief was schief!', 'Die Änderungen deiner Charakterwerte konnten nicht gespeichert werden. Bitte versuche es erneut und lade die Seite gegebenenfalls neu.');
+    }
+  }).fail(function (){
+    popup('Hoppla, da lief was schief!', 'Die Änderungen deiner Charakterwerte konnten nicht gespeichert werden. Bitte versuche es erneut und lade die Seite gegebenenfalls neu.');
+  });
+}
+
+
+/* BATTLE */
+// skill trial
+$(document).on('click', '#diceSelectionS .skill', function (event){
+  // get skill
+  var skill, skillValue, skillTitle;
+  if($(event.target).hasClass('skill')){
+    skill = $(event.target).attr('id');
+    skillValue = $(event.target).attr('data-value');
+    skillTitle = $(event.target).attr('data-title');
+  }
+  else{
+    skill = $(event.target).parent().attr('id');
+    skillValue = $(event.target).parent().attr('data-value');
+    skillTitle = $(event.target).parent().attr('data-title');
+  }
+  // get number and type of dices
+  $.post('/selectDices', { skill:skill }, function (response){
+    console.log('received data');
+    console.log(response);
+    if(!response.err){
+      // hide sidebar
+      toggleSidebar();
+
+      document.getElementById('diceBox').innerHTML = '';
+
+      var numOfDices;
+      for(var n=0; n<response.attributes.length; n++){
+        var div = document.createElement('div');
+        div.id = 'castOfDice'+(n+1);
+        div.className = 'castOfDice';
+        // only show dices for the first attribute
+        if(n>0) div.className = 'hide';
+        $(div).attr('data-trialType', 'skill');
+        $(div).attr('data-diceSides', 20);
+        $(div).attr('data-skillValue', skillValue);
+        $(div).attr('data-title', skillTitle);
+        div.innerHTML = '<h3>Wurf auf das Attribut '+response.attributes[n]+'</h3>';
+
+        // get num of dices for attribute
+        switch (response.attributes[n]) {
+          case 'Intuition':
+            numOfDices = response.numOfDices.intuition;
+            break;
+          case 'Intelligenz':
+            numOfDices = response.numOfDices.intelligence;
+            break;
+          case 'Geschicklichkeit':
+            numOfDices = response.numOfDices.agility;
+            break;
+          case 'Stärke':
+            numOfDices = response.numOfDices.strength;
+            break;
+          case 'Intriganz':
+            numOfDices = response.numOfDices.scheming;
+            break;
+          case 'Sozial':
+            numOfDices = response.numOfDices.social;
+            break;
+        }
+
+        for(var m=0; m<numOfDices; m++) {
+          // make first dice master dice
+          if(m<=0) div.innerHTML = div.innerHTML+'<button class="dice master">?</button>';
+          else div.innerHTML = div.innerHTML+'<button class="dice">?</button>';
+        }
+
+        div.innerHTML = div.innerHTML+'<br><a onClick="castTheDice(this);">Würfeln</a>';
+
+        $('#diceBox').append(div);
+
+        // show received dices
+        setTimeout(function(){
+          $('#diceBox').parent().removeClass('hide');
+          $('#shadowBox').addClass('visible');
+        }, 500);
+      }
+    }
+    else{
+      popup('Hoppla, da lief was schief!', 'Die Würfel sind verloren gegangen. Bitte versuche es erneut.');
+    }
+  }).fail(function (){
+    popup('Hoppla, da lief was schief!', 'Die Würfel sind verloren gegangen. Bitte versuche es erneut.');
+  });
+});
+
+// attribute trial
+$(document).on('click', '#diceSelectionA .attribute', function (event){
+  // get attribute
+  var attribute, attributeValue, attributeTitle;
+  if($(event.target).hasClass('attribute')){
+    attribute = $(event.target).attr('id');
+    attributeValue = $(event.target).attr('data-value');
+    attributeTitle = $(event.target).attr('data-title');
+  }
+  else{
+    attribute = $(event.target).parent().attr('id');
+    attributeValue = $(event.target).parent().attr('data-value');
+    attributeTitle = $(event.target).parent().attr('data-title');
+  }
+
+  // get dice
+  document.getElementById('diceBox').innerHTML = '';
+  var div = document.createElement('div');
+  div.id = 'castOfDice';
+  div.className = 'castOfDice';
+  $(div).attr('data-trialType', 'attribute');
+  $(div).attr('data-diceSides', 20);
+  $(div).attr('data-attributeValue', attributeValue);
+  $(div).attr('data-title', attributeTitle);
+  div.innerHTML = '<h3>Wurf auf das Attribut '+attributeTitle+'</h3>';
+  div.innerHTML = div.innerHTML+'<button class="dice">?</button>';
+  div.innerHTML = div.innerHTML+'<br><a onClick="castTheDice(this);">Würfeln</a>';
+  $('#diceBox').append(div);
+
+  // hide sidebar
+  toggleSidebar();
+  setTimeout(function (){
+    // show dice on screen
+    $('#diceBox').parent().removeClass('hide');
+    $('#shadowBox').addClass('visible');
+  }, 500);
+});
+
+socket.on('attackTheEnemie', function (data){
+  // clear div from dices
+  document.getElementById('diceBox').innerHTML = '';
+
+  var div = document.createElement('div');
+  div.id = 'castOfDice';
+  div.class = 'castOfDice';
+  $(div).attr('data-diceSides', 3);
+  // set variables for enemie hit
+  $(div).attr('data-trialType', 'enemieHit');
+  $(div).attr('data-enemie', data.enemie);
+
+  div.innerHTML = '<h3>Verletze den Gegner</h3>';
+
+  // create as many dices as the level value says
+  var numOfDices = data.level;
+  for(var m=0; m<numOfDices; m++) {
+    div.innerHTML = div.innerHTML+'<button class="dice">?</button>';
+  }
+  // add button to cast the dice
+  div.innerHTML = div.innerHTML+'<br><a onClick="castTheDice(this);">Würfeln</a>';
+  // show received dices
+  $('#diceBox').append(div);
+  $('#diceBox').parent().removeClass('hide');
+  $('#shadowBox').addClass('visible');
+});
+
+socket.on('updateEnemies', function (data){
+  var enemie;
+  $('#battle .enemie').each(function (){
+    // get data for enemie
+    for(var i=0; i<data.enemiesData.length; i++){
+      // get object from data string
+      enemie = JSON.parse(data.enemiesData[i]);
+      if($(this).attr('id') === enemie.uniqueID){
+        // update health value
+        $('#'+$(this).attr('id')+' .info input[name=hp]').val(enemie.hp);
+        $('#'+$(this).attr('id')+' .info input[name=hp]').attr('style', 'width:'+enemie.hp+'0px');
+        // check if enemie is dead
+        if(enemie.hp <= 0) $(this).addClass('dead');
+      }
+    }
+  });
+});
+
+socket.on('getHit', function (data){
+  characterInjuries(true, data.enemieID, data.hit);
+});
+
+socket.on('stopBattle', function (data){
+  inBattle = false;
+  // clear and hide battle div
+  $('body').removeClass('inBattle');
+  $('#enemiesWrapper').addClass('hidden');
+  setTimeout(function (){
+    $('#enemiesWrapper').removeClass('hidden');
+  }, 1000);
+  $('#battle').empty();
+});
+
+
+/* DICE RESULT */
+var textResults = [];
+function castTheDice (sender){
+  if($(sender).hasClass('disabled')) return;
+  // disable clicked button so that player can cast the dice only once
+  $(sender).addClass('disabled');
+
+  var parentID = $(sender).parent().attr('id');
+  var diceSides = $(sender).parent().attr('data-diceSides');
+
+  // display pips for each dice
+  var allResults = [], masterResult;
+  $('#'+parentID+' .dice').each( function (){
+    this.innerHTML = getPips(diceSides);
+    allResults.push(this.innerHTML);
+    if($(this).hasClass('master')) masterResult = this.innerHTML;
+  });
+
+  // get the best result
+  var bestResult = Math.max.apply(Math, allResults);
+
+  // check if the result hits an enemie
+  if($('#'+parentID).attr('data-trialType') === 'enemieHit'){
+
+    // update view
+    var injury = '';
+    switch (bestResult) {
+      case 1:
+        injury = 'leicht ';
+        break;
+      case 3:
+        injury = 'schwer ';
+        break;
+    }
+    setTimeout(function (){
+      // change headline
+      $('#'+parentID).children('h3').html('Der Gegner wurde '+injury+'verletzt.');
+
+      // change values
+      var wiggleSet = false;
+      $('#'+parentID+' .dice').each(function (){
+        // crucial dice wiggle
+        if(parseInt(this.innerHTML)==bestResult && !wiggleSet){
+          $(this).addClass('wiggle');
+          wiggleSet = true;
+        }
+      });
+      setTimeout(function (){
+        // inform the gamemaster of the result to hit the enemie
+        socket.emit('hitTheEnemie', {roomID:roomID, hit:bestResult, enemie:$('#'+parentID).attr('data-enemie')});
+
+        // update health value
+        var newHP = $('#'+$('#'+parentID).attr('data-enemie')+' .info input[name=hp]').val()-bestResult;
+        $('#'+$('#'+parentID).attr('data-enemie')+' .info input[name=hp]').val(newHP);
+        $('#'+$('#'+parentID).attr('data-enemie')+' .info input[name=hp]').attr('style', 'width:'+newHP+'0px');
+
+        // hide popup
+        $('#diceBox').parent().addClass('hide');
+        $('#shadowBox').removeClass('visible');
+      }, 3000);
+    }, 1200);
+  }
+  else if($('#'+parentID).attr('data-trialType') === 'skill'){
+    // get result as text
+    var textResult = '';
+    if(masterResult=='1'){
+      $('#'+parentID).attr('data-result', '1');
+      textResult = 'kritischer Misserfolg';
+    }
+    else if(masterResult=='20'){
+      $('#'+parentID).attr('data-result', '4');
+      textResult = 'kritischer Erfolg';
+    }
+    else if(bestResult+$('#'+parentID).attr('data-skillValue').length >= 19){
+      $('#'+parentID).attr('data-result', '3');
+      textResult = 'Erfolg';
+    }
+    else{
+      $('#'+parentID).attr('data-result', '2');
+      textResult = 'Misserfolg';
+    }
+    textResults.push(textResult);
+
+    // update view for player
+    setTimeout(function (){
+      // show bonus
+      $('#bonusValue').html('+ '+$('#'+parentID).attr('data-skillValue'));
+      $('#bonus').removeClass('hide');
+      setTimeout(function (){
+      $('#bonus').addClass('big');
+        setTimeout(function (){
+          $('#bonus').removeClass('big');
+          // change headline
+          $('#'+parentID).children('h3').html('Ein '+textResult);
+          // change values and hide bonus
+          var wiggleSet = false;
+          $('#'+parentID+' .dice').each(function (){
+            // crucial dice wiggle
+            if((($(this).hasClass('master') && (parseInt(this.innerHTML)==1 || parseInt(this.innerHTML)==20)) || parseInt(this.innerHTML)==bestResult) && !wiggleSet){
+              $(this).addClass('wiggle');
+              wiggleSet = true;
+            }
+            // update dice number
+            if(!$(this).hasClass('master') || ($(this).hasClass('master') && parseInt(this.innerHTML)>1 && parseInt(this.innerHTML)<20)){
+              this.innerHTML = parseInt(this.innerHTML)+parseInt($('#'+parentID).attr('data-skillValue'));
+            }
+          });
+          $('#bonus').addClass('hide');
+          setTimeout(function (){
+            if($('#castOfDice'+(parseInt(parentID.split('castOfDice')[1])+1)).length > 0){
+              // show next
+              $('#'+parentID).addClass('hide');
+              $('#castOfDice'+(parseInt(parentID.split('castOfDice')[1])+1)).removeClass('hide');
+            }
+            else{
+              // get results
+              var finalResult = 0;
+              $('#'+parentID+' .castOfDice').each(function(){
+                finalResult + parseInt($(this).attr('data-result'));
+              });
+
+              var div = document.createElement('div');
+              div.className = 'result';
+              if(textResults.length > 1) div.innerHTML = '<p>Die Ergebnisse waren ein '+textResults[0]+' und ein '+textResults[1]+'.</p>';
+              else div.innerHTML = '<p>Das Ergebnis war ein '+textResults[0]+'.</p>';
+
+              var headline = document.createElement('h3');
+              headline.innerHTML += 'Du hast die Probe auf die Fertigkeit "'+$('#'+parentID).attr('data-title')+'" ';
+              // to stand the skill test, the final result must be 6 or higher
+              if(finalResult<6) headline.innerHTML += 'nicht ';
+              headline.innerHTML += 'bestanden.';
+              $(div).append(headline);
+
+              // reset variables
+              textResults = [];
+
+              // show results
+              $('#diceBox').empty();
+              $('#diceBox').html(div);
+              $('#diceBox').append('<a onClick="closeDiceBox();">OK</a>');
+            }
+          }, 3000);
+        }, 1200);
+      }, 1000);
+    }, 100);
+  }
+  else if($('#'+parentID).attr('data-trialType') === 'attribute'){
+    // get result as text
+    var textResult = '';
+    if(bestResult+$('#'+parentID).attr('data-attributeValue').length >= 11){
+      $('#'+parentID).attr('data-result', '3');
+      textResult = 'Erfolg';
+    }
+    else{
+      $('#'+parentID).attr('data-result', '2');
+      textResult = 'Misserfolg';
+    }
+
+    // update view for player
+    setTimeout(function (){
+      // show bonus
+      $('#bonusValue').html('+ '+$('#'+parentID).attr('data-attributeValue'));
+      $('#bonus').removeClass('hide');
+      setTimeout(function (){
+      $('#bonus').addClass('big');
+        setTimeout(function (){
+          $('#bonus').removeClass('big');
+          // change headline
+          $('#'+parentID).children('h3').html('Ein '+textResult);
+          // let the dice wiggle, change values and hide bonus
+          $('#'+parentID+' .dice').each(function (){
+            $(this).addClass('wiggle');
+            // update dice number
+            this.innerHTML = parseInt(this.innerHTML)+parseInt($('#'+parentID).attr('data-attributeValue'));
+          });
+          $('#bonus').addClass('hide');
+          setTimeout(function (){
+            // get the result
+            var div = document.createElement('div');
+            div.className = 'result';
+
+            var headline = document.createElement('h3');
+            headline.innerHTML += 'Du hast die Probe auf das Attribut "'+$('#'+parentID).attr('data-title')+'" ';
+            // to stand the attribute test, the final result must be 3 or higher
+            if($('#'+parentID).attr('data-result')<3) headline.innerHTML += 'nicht ';
+            headline.innerHTML += 'bestanden.';
+            $(div).append(headline);
+
+            // show results
+            $('#diceBox').empty();
+            $('#diceBox').html(div);
+            $('#diceBox').append('<a onClick="closeDiceBox();">OK</a>');
+          }, 3000);
+        }, 1200);
+      }, 1000);
+    }, 100);
+  }
+}
+
+function getPips (diceSides){
+  return Math.floor((Math.random()*diceSides)+1);
+}
+
+
+/* CHARACTER SHEET */
+$('#characterFormInner .step').each(function (){
+  // change character sheet headlines
+  $(this).children('h3').html($(this).attr('data-title'));
+  // change character sheet scrollbars
+  $(this).attr('data-scrollbar', 'light');
+});
+// append step change buttons to character sheet
+$('#characterFormInner').append('<a class="prev stepBtn hide" onClick="prevStep();"></a><a class="next stepBtn" onClick="nextStep();"></a>');
+
+function prevStep (){
+  scrollTo(currentStep-1);
+}
+function nextStep (){
+  scrollTo(currentStep+1);
+}
+
+var steps = 3;
+var currentStep = 1;
+function scrollTo (step){
+  console.log('step '+step);
+  // check if a next step is available
+  if(step<=0 || step>step) return false;
+
+  // hide step buttons
+  $('#characterFormInner .stepBtn').each(function (){
+    $(this).addClass('hide');
+  });
+
+  // update step variable
+  currentStep = parseInt(step);
+
+  // scroll to step
+  var pos = $('.step').width()*(step-1);
+  $('#characterFormOuter').animate({scrollLeft: pos}, 800, function(){
+    // show step buttons again
+    $('#characterFormInner .stepBtn').each(function (){
+      if($(this).hasClass('prev') && currentStep>1) $(this).removeClass('hide');
+      else if($(this).hasClass('next') && currentStep<3) $(this).removeClass('hide');
+    });
+
+    // mark current step div as current
+    $('.step').each(function (){
+      if($(this).attr('data-step') == step){
+        $(this).addClass('current');
+      }
+      else{
+        $(this).removeClass('current');
+      }
+    });
+  });
+}
+
+/* TUTORIAL */
+$('#toggleTutorial').on('click', function (){
+  var tutorial;
+  if(!$('#tutorial input[name="tutorial"]').prop('checked')){
+    tutorial = true;
+  }
+  else{
+    tutorial = false;
+  }
+
+  // save changes in database
+  $.post('/toggleTutorial', { tutorial:tutorial }, function (response){
+    if(!response.err){
+      console.log(tutorial);
+      $('#tutorial input[name="tutorial"]').prop('checked', tutorial);
+      if(tutorial) startTutorialNow();
+      else stopTutorial();
+    }
+    else{
+      popup('Hoppla, da lief was schief!', 'Bitte versuche erneut den Tutorial-Modus zu ändern und lade die Seite gegebenenfalls neu.');
+    }
+  }).fail(function (){
+    popup('Hoppla, da lief was schief!', 'Bitte versuche erneut den Tutorial-Modus zu ändern und lade die Seite gegebenenfalls neu.');
+  });
+});
+
+
+
+/* CLOSE */
+$(document).on('click', '#close', function (){
+  socket.emit('leaveAdventure', { username:'<%= username %>', roomID:roomID });
+});
+
+socket.on('leaveAdventure', function (){
+  window.location.href = "http://141.59.164.11:3000/close/"+roomID;
+});
+
+socket.on('adventureClosed', function (){
+  popup('Das Spiel wurde beendet.');
+  setTimeout(function(){ window.location.href = "http://141.59.164.11:3000/close/"+roomID }, 2000);
+});
+
+</script>
+
+</body>
+</html>

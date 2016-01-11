@@ -1,0 +1,107 @@
+<!-- STEP 1 - CHARACTER ATTRIBUTES -->
+<div class="step" data-step="1" data-title="Attribute">
+	<h3>Gib deinem Charakter Attributwerte.</h3>
+
+	<form id="aForm">
+		<% for(var n=0; n<(attributes.title.length/2); n++){ %>
+		<fieldset class="group g<%= (n+1) %>">
+			<div class="attribute g<%= (n+1) %>">
+				<img src="/images/charactersheet/<%= attributes.name[n*2] %>.png" alt="<%= attributes.title[n*2] %>"/>
+				<input type="button" name="<%= attributes.name[n*2] %>" class="a1" data-value="-" onClick="removeAttr(this, 1);"/><!--
+				--><input type="button" name="<%= attributes.name[n*2] %>" class="a1" data-value="+" onClick="addAttr(this, 1);"/>
+			</div>
+
+			<div class="a1 g<%= (n+1) %>">
+				<% for(var i=0; i<6; i++){ if(i<=2) { %>
+				<input type="checkbox" value="<%= (i+1) %>" name="<%= attributes.name[n*2] %>" class="a1"><span class="checkbox"></span>
+				<% }else{ %>
+				<input type="checkbox" value="<%= (i+1) %>" name="<%= attributes.name[n*2] %>" class="a1 disabled"><span class="checkbox"></span>
+				<% }} %>
+			</div>
+			<div class="a2 g<%= (n+1) %>">
+				<% for(var i=0; i<6; i++){ if(i<=2) { %>
+				<input type="checkbox" value="<%= (i+1) %>" name="<%= attributes.name[n*2+1] %>" class="a2"><span class="checkbox"></span>
+				<% }else{ %>
+				<input type="checkbox" value="<%= (i+1) %>" name="<%= attributes.name[n*2+1] %>" class="a2 disabled"><span class="checkbox"></span>
+				<% }} %>
+			</div>
+
+			<div class="attribute g<%= (n+1) %>">
+				<img src="/images/charactersheet/<%= attributes.name[n*2+1] %>.png" alt="<%= attributes.title[n*2+1] %>"/>
+				<input type="button" name="<%= attributes.name[n*2+1] %>" class="a2" data-value="-" onClick="removeAttr(this, 1);"/><!--
+				--><input type="button" name="<%= attributes.name[n*2+1] %>" class="a2" data-value="+" onClick="addAttr(this, 1);"/>
+			</div>
+		</fieldset>
+		<% } %>
+	</form>
+</div><!--
+
+STEP 2 - CHARACTER SKILLS
+--><div class="step" data-step="2" data-title="Fertigkeiten">
+	<h3>Wähle welche Fertigkeiten dein Charakter bereits erlernt hat.</h3>
+
+	<form id="sForm">
+		<% for(var n=0; n<skills.title.length; n++){ %>
+		<div class="skill">
+			<input type="button" name="<%= skills.name[n] %>" data-value="-" onClick="removeSkill(this, 1);"/>
+			<div class="skillInner" data-attributes="<%= skills.attributes[n] %>">
+				<div class="images"></div>
+				<p><%= skills.title[n] %></p><br/>
+				<% for(var m=0; m<16; m++){ %>
+				<input type="checkbox" value="<%= (m+1) %>" name="<%= skills.name[n] %>"><span class="checkbox"></span>
+				<% } %>
+			</div>
+			<input type="button" name="<%= skills.name[n] %>" data-value="+" onClick="addSkill(this, 1);"/>
+		</div>
+		<% } %>
+	</form>
+</div><!--
+
+STEP 3 - CHARACTERISTICS
+--><div class="step" data-step="3" data-title="Charaktereigenschaften">
+	<h3>Wähle Charaktereigenschaften.</h3>
+
+	<form id="cForm">
+		<fieldset class="advantages">
+			<h4>Vorteile</h4>
+		<% for(var n=0; n<characteristics.advantages.title.length; n++){ %>
+			<p><input type="checkbox" name="<%= characteristics.advantages.name[n] %>" data-costs="<%= characteristics.advantages.costs[n] %>"><span class="checkbox"></span> <%= characteristics.advantages.title[n] %> (<%= characteristics.advantages.costs[n] %>)</p>
+		<% } %>
+		</fieldset><!--
+		--><fieldset class="disadvantages">
+			<h4>Nachteile</h4>
+		<% for(var n=0; n<characteristics.disadvantages.title.length; n++){ %>
+			<p><input type="checkbox" name="<%= characteristics.disadvantages.name[n] %>" data-costs="<%= characteristics.disadvantages.costs[n] %>"><span class="checkbox"></span> <%= characteristics.disadvantages.title[n] %> (-<%= characteristics.disadvantages.costs[n] %>)</p>
+		<% } %>
+		</fieldset>
+	</form>
+</div><!--
+
+STEP 4 - CHARACTER INFORMATIONS
+--><div class="step" data-step="4" data-title="Persönliche Angaben">
+	<h3>Vervollständige den Charakter mit persönlichen Informationen.</h3>
+
+	<form id="iForm">
+		<label>Name des Charakters</label><input type="text" name="name" maxlength="70"<% if(response){ %> value="<%= response.informations.name %>"<% } %>><br>
+		<label>Alter</label><input type="number" name="age" min="0"<% if(response){ %> value="<%= response.informations.age %>"<% } %>><br>
+		<label>Beruf</label><input type="text" name="occupation" maxlength="100"<% if(response){ %> value="<%= response.informations.occupation %>"<% } %>><br>
+		<label>Herkunft</label><input type="text" name="origin" maxlength="100"<% if(response){ %> value="<%= response.informations.origin %>"<% } %>><br>
+		<label>Beschreibung</label><textarea type="text" name="description" maxlength="300" rows="4"><% if(response){ %><%= response.informations.description %><% } %></textarea>
+		<input name="startLevel" <% if(startLevel){ %>value="<%= startLevel %>"<% } %> type="hidden">
+		<input name="cp" value="0" type="hidden">
+	</form>
+</div><!--
+
+STEP 5 - CHARACTER IMAGE
+--><div class="step" data-step="5" data-title="Aussehen">
+	<h3>Verpasse deinem Charakter ein äußerliches Erscheinungsbild.</h3>
+
+	<div id="canvasOuter">
+		<div id="canvasInner">
+			<div id="maxCanvas"></div>
+			<canvas id="canvas" width="600" height="600" style="border:1px solid #fff;"></canvas>
+		</div>
+	</div>
+	<!-- blank canvas for checking if something was drawn -->
+	<canvas id="blankCanvas" width="600" height="600" style="display:none"></canvas>
+</div>
